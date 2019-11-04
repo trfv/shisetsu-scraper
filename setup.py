@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='shisetsu-scraper',
-    version='0.1.0',
+    version='0.0.1',
     description='spraping tools',
     long_description=readme,
     author='TRFV',
