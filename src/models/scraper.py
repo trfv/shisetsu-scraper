@@ -114,7 +114,11 @@ class KoutouScraperModel(ScraperModel):
         has_next = True
         while has_next:
             # dispというIDのテーブルが読み込まれるまでは待機
-            WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.ID, 'disp')))
+            try:
+                WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.ID, 'disp')))
+            except TimeoutException as e:
+                print(f'failed to load table due to timeout.')
+                break
 
             # 建物名・施設名取得
             title = self.driver.find_element_by_xpath(self.TITLE_XPATH)
