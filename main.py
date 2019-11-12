@@ -1,8 +1,8 @@
 # coding: utf-8
 import datetime
 
-# from src.controller import koutou
-from src.controller import edogawa
+# from src.koutou.controller import main as koutou
+from src.edogawa.controller import main as edogawa
 
 def main():
     # koutou.main(datetime.date.today() + datetime.timedelta(days=1))

@@ -1,15 +1,15 @@
 # coding: utf-8
-import time
+import datetime
 
-from src.models import scraper, reservation
+from src.koutou.models import scraper, reservation
 
 def main(date):
-    start = time.time()
-    reservation_model = reservation.ReservationModel()
+    start = datetime.datetime.now()
+    reservation_model = reservation.KoutouReservationModel('src/koutou/reservation.csv')
     scraper_model = scraper.KoutouScraperModel(date, reservation_model)
     scraper_model.prepare_for_scraping()
     scraper_model.scraping()
     scraper_model.clear()
     reservation_model.save()
-    end = time.time()
+    end = datetime.datetime.now()
     print(f'it took {end - start} seconds.')
