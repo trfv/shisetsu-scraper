@@ -1,4 +1,3 @@
-# coding: utf-8
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
@@ -10,7 +9,7 @@ from src.common.models.scraper import ScraperModel
 
 class KoutouScraperModel(ScraperModel):
     """
-    scraper for koutou-ku
+    scraper model for koutou-ku
     """
 
     ROOT_URL = "https://sisetun.kcf.or.jp/web/"

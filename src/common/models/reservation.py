@@ -6,7 +6,8 @@ import pandas as pd
 
 class CsvModel:
     """
-    base csv model
+    CSVのカラム名を定義している\n
+    self.dataに対し、scraperから書き込んでいき、最終的にdataをcsvに変換する
     """
 
     BUILDING = "building"

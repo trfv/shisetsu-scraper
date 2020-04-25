@@ -10,10 +10,10 @@ class EdogawaReservationModel(CsvModel):
     written by 藪智明 2019-11-09
     """
 
-    def __init__(self, csv_file=None):
-        if not csv_file:
-            csv_file = self.CSV_FILE
-        super().__init__(csv_file)
+    CSV_FILE = "src/edogawa/reservation.csv"
+
+    def __init__(self):
+        super().__init__(self.CSV_FILE)
 
     def to_dict_rows(self, rows):
         res = []
