@@ -18,7 +18,6 @@ class EdogawaReservationModel(CsvModel):
     def to_dict_rows(self, rows):
         res = []
         header_row = rows[0]  # [開始年月日, 日にち, 曜日]
-        now = datetime.datetime.today()
         year = re.findall(r"\d{4}[/\.年]", header_row[0])[0].strip("年")
         month = re.findall(r"\d{2}[/\.月]", header_row[0])[0].strip("月")
         for i in range(1, len(rows)):
@@ -39,8 +38,6 @@ class EdogawaReservationModel(CsvModel):
                             self.DAY_OF_THE_WEEK: day_of_the_week,
                             self.RESERVATION_STATUS: target_arr[k],
                             self.RESERVATION_DIVISION: reservation_division,
-                            self.CREATE_DATETIME: now,
-                            self.UPDATE_DATETIME: now,
                         },
                     )
         return res

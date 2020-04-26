@@ -124,13 +124,13 @@ class KoutouScraperModel(ScraperModel):
             self.reservation_model.append(building, institute, rows)
 
             # has_nextの更新
-            try:
-                self.driver.find_element_by_xpath(self.NEXT_BUTTON_XPATH)
-            except NoSuchElementException:  # 次施設がクリックできない時
-                has_next = False
-            except Exception as e:  # なんらかの理由でデータが取得できなかった時
-                print("failed to update has_next.")
-                raise e
+            # try:
+            #     self.driver.find_element_by_xpath(self.NEXT_BUTTON_XPATH)
+            # except NoSuchElementException:  # 次施設がクリックできない時
+            has_next = False
+            # except Exception as e:  # なんらかの理由でデータが取得できなかった時
+            #     print("failed to update has_next.")
+            #     raise e
 
             # 次の施設へ
-            self.exec_next_page_script(self.TO_NEXT_INSTITUTE_SCRIPT)
+            # self.exec_next_page_script(self.TO_NEXT_INSTITUTE_SCRIPT)

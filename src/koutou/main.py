@@ -12,7 +12,7 @@ def main(date=None):
     scraper_model.prepare_for_scraping()
     scraper_model.scraping()
     scraper_model.clear()
-    reservation_model.save()
+    reservation_model.copy()
 
 
 if __name__ == "__main__":

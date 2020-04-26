@@ -20,11 +20,8 @@ class ScraperModel:
         self.root_url = root_url
         chrome_options = webdriver.ChromeOptions()
 
-        # FIXME ローカル環境で実行するときは、ここを書き換える必要がある
-        CHROMEDRIVER_PATH = os.environ.get(
-            "CHROMEDRIVER_PATH",
-            "/Users/senda_y/src/github.com/shisetsu-scraper/chromedriver",
-        )
+        # FIXME ローカル環境で実行するときは、ここの第2引数を書き換える必要がある
+        CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "",)
         GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
 
         if GOOGLE_CHROME_BIN:

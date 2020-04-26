@@ -16,7 +16,6 @@ class KoutouReservationModel(CsvModel):
     def to_dict_rows(self, building, institution, rows):
         res = []
         header_row = rows[0]
-        now = datetime.datetime.today()
         for i in range(1, len(rows)):
             target_row = rows[i]
             reservation_division = target_row[0]
@@ -33,8 +32,6 @@ class KoutouReservationModel(CsvModel):
                         self.DAY_OF_THE_WEEK: day_of_the_week,
                         self.RESERVATION_STATUS: target_row[j],
                         self.RESERVATION_DIVISION: reservation_division,
-                        self.CREATE_DATETIME: now,
-                        self.UPDATE_DATETIME: now,
                     },
                 )
         return res
