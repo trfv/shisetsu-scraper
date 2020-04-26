@@ -1,15 +1,17 @@
+import os
 import re
+import time
 
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from src.common.models.scraper import ScraperModel
 
-
-class EdogawaScraperModel(ScraperModel):
+class EdogawaScraperModel:
     """
-    scraper for edogawa-ku
+    scraper model for edogawa-ku
     written by 藪智明 2019-11-09
     """
 
@@ -37,9 +39,39 @@ class EdogawaScraperModel(ScraperModel):
     )
 
     def __init__(self, start_date, reservation_model):
-        super().__init__(self.ROOT_URL)
         self.start_date = start_date
         self.reservation_model = reservation_model
+
+        chrome_options = webdriver.ChromeOptions()
+
+        # FIXME ローカル環境で実行するときは、ここの第2引数を書き換える必要がある
+        CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "",)
+        GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
+
+        if GOOGLE_CHROME_BIN:
+            chrome_options.binary_location = GOOGLE_CHROME_BIN
+
+        # chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--disable-dev-shm-usage")
+        # chrome_options.add_argument("--no-sandbox")
+        self.driver = webdriver.Chrome(
+            executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options,
+        )
+
+    def exec_next_page_script(self, script):
+        try:
+            WebDriverWait(self.driver, 30).until(EC.presence_of_all_elements_located,)
+            time.sleep(5)
+            self.driver.execute_script(script)
+        except TimeoutException as e:
+            print(f"failed to execute script due to timeout. script={script}")
+            raise e
+        except Exception as e:
+            print(f"failed to execute script: {script}")
+            raise e
+
+    def clear(self):
+        self.driver.quit()
 
     def to_rows(self, table):
         res = []
@@ -73,7 +105,7 @@ class EdogawaScraperModel(ScraperModel):
         return res
 
     def prepare_for_scraping(self):
-        self.driver.get(self.root_url)
+        self.driver.get(self.ROOT_URL)
         self.exec_next_page_script(self.SEARCH_VACANT_SCRIPT,)  # 空状況照会・予約（利用目的から選択）ボタン
         self.exec_next_page_script(self.TO_NEXT_PAGE_SCRIPT)  # 次のページボタン
         self.exec_next_page_script(self.SEARCH_INSTRUMENTAL_LOUD_SCRIPT,)  # 器楽（音量大）ボタン

@@ -1,19 +1,42 @@
 import datetime
+import io
+import os
+import pathlib
 import re
 
-from src.common.models.reservation import CsvModel
+import pandas as pd
+import psycopg2
+
+# FIXME ローカルで実行するときは、ここの第2引数を書き換える必要がある
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 
-class EdogawaReservationModel(CsvModel):
+class EdogawaReservationModel:
     """
     reservation model for edogawa-ku
     written by 藪智明 2019-11-09
     """
 
+    BUILDING = "building"
+    INSTITUTION = "institution"
+    DATE = "date"
+    DAY_OF_THE_WEEK = "day_of_the_week"
+    RESERVATION_DIVISION = "reservation_division"
+    RESERVATION_STATUS = "reservation_status"
     CSV_FILE = "src/edogawa/reservation.csv"
 
     def __init__(self):
-        super().__init__(self.CSV_FILE)
+        self.data = []
+        self.columns = [
+            self.BUILDING,
+            self.INSTITUTION,
+            self.DATE,
+            self.DAY_OF_THE_WEEK,
+            self.RESERVATION_DIVISION,
+            self.RESERVATION_STATUS,
+        ]
+        if not os.path.exists(self.CSV_FILE):
+            pathlib.Path(self.CSV_FILE).touch()
 
     def to_dict_rows(self, rows):
         res = []
@@ -45,3 +68,8 @@ class EdogawaReservationModel(CsvModel):
     def append(self, rows):
         new_data = self.to_dict_rows(rows)
         self.data.extend(new_data)
+
+    def save(self):
+        df = pd.DataFrame(data=self.data, columns=self.columns,)
+        df.to_csv(self.csv_file, columns=self.columns)
+        print(f"saved data to {self.csv_file}")

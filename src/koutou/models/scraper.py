@@ -1,13 +1,15 @@
+import os
+import time
+
+from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from src.common.models.scraper import ScraperModel
 
-
-class KoutouScraperModel(ScraperModel):
+class KoutouScraperModel:
     """
     scraper model for koutou-ku
     """
@@ -38,22 +40,52 @@ class KoutouScraperModel(ScraperModel):
     )
 
     def __init__(self, start_date, reservation_model):
-        super().__init__(self.ROOT_URL)
         self.start_date = start_date
         self.reservation_model = reservation_model
 
+        chrome_options = webdriver.ChromeOptions()
+
+        # FIXME ローカル環境で実行するときは、ここの第2引数を書き換える必要がある
+        CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "")
+        GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
+
+        if GOOGLE_CHROME_BIN:
+            chrome_options.binary_location = GOOGLE_CHROME_BIN
+
+        # chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--disable-dev-shm-usage")
+        # chrome_options.add_argument("--no-sandbox")
+        self.driver = webdriver.Chrome(
+            executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options,
+        )
+
+    def exec_next_page_script(self, script):
+        try:
+            WebDriverWait(self.driver, 30).until(EC.presence_of_all_elements_located,)
+            time.sleep(5)
+            self.driver.execute_script(script)
+        except TimeoutException as e:
+            print(f"failed to execute script due to timeout. script={script}")
+            raise e
+        except Exception as e:
+            print(f"failed to execute script: {script}")
+            raise e
+
+    def clear(self):
+        self.driver.quit()
+
     def get_status_from_img_src(self, img_src):
-        if img_src == self.root_url + self.EMPTYBS_GIF:
+        if img_src == self.ROOT_URL + self.EMPTYBS_GIF:
             return "VACANT"
-        elif img_src == self.root_url + self.FINISHS_GIF:
+        elif img_src == self.ROOT_URL + self.FINISHS_GIF:
             return "OCCUPIED"
-        elif img_src == self.root_url + self.CLOSES_GIF:
+        elif img_src == self.ROOT_URL + self.CLOSES_GIF:
             return "CLOSED"
-        elif img_src == self.root_url + self.KEEPS_GIF:
+        elif img_src == self.ROOT_URL + self.KEEPS_GIF:
             return "KEEP"
-        elif img_src == self.root_url + self.KIKANGAIS_GIF:
+        elif img_src == self.ROOT_URL + self.KIKANGAIS_GIF:
             return "KIKANGAI"
-        elif img_src == self.root_url + self.SOUND_GIF:
+        elif img_src == self.ROOT_URL + self.SOUND_GIF:
             return "SOUND"
         else:
             return "INVALID"
@@ -82,7 +114,7 @@ class KoutouScraperModel(ScraperModel):
         return res
 
     def prepare_for_scraping(self):
-        self.driver.get(self.root_url)
+        self.driver.get(self.ROOT_URL)
         self.exec_next_page_script(self.SEARCH_VACANT_SCRIPT)  # 施設の空き状況ボタン
         self.exec_next_page_script(self.SEARCH_MULTIPLE_SCRIPT)  # 複合検索ボタン
         self.exec_next_page_script(self.START_SETTING_DATE_SCRIPT)  # 年月日ボタン
