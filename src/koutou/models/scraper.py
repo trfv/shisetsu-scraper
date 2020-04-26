@@ -8,6 +8,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+# FIXME ローカル環境で実行するときは、ここの第2引数を書き換える必要がある
+CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "")
+GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
+
 
 class KoutouScraperModel:
     """
@@ -45,16 +49,12 @@ class KoutouScraperModel:
 
         chrome_options = webdriver.ChromeOptions()
 
-        # FIXME ローカル環境で実行するときは、ここの第2引数を書き換える必要がある
-        CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "")
-        GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
-
         if GOOGLE_CHROME_BIN:
             chrome_options.binary_location = GOOGLE_CHROME_BIN
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument("--no-sandbox")
 
-        # chrome_options.add_argument("--headless")
-        # chrome_options.add_argument("--disable-dev-shm-usage")
-        # chrome_options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options,
         )

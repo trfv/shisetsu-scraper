@@ -1,13 +1,9 @@
 ## Caution
 - このディレクトリをそのまま1つのパッケージとしてデプロイする
 - 区ごとに分割することで依存性を減らすことが狙い（将来的にはレポジトリを分割する可能性あり）
-
-
-- pythonのrelative importの使用上、shisetsu-scraper/src/koutou以下でmain.pyを実行しようとするとエラーが発生する。
-- ローカル環境で検証するときは、shisetsu-scraper以下で実行すること。
+- ローカル環境で検証するときは、shisetsu-scraper/src/koutou以下で実行すること。
 ```
-shisetu-scraper/src/koutou $ poetry run python main.py  // fail!
-shisetu-scraper $ make koutou  // success!
+shisetu-scraper/src/koutou $ poetry run python main.py
 ```
 
 

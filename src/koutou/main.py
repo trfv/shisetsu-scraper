@@ -1,7 +1,7 @@
 import datetime
 
-from src.koutou.models import reservation
-from src.koutou.models import scraper
+from models import reservation
+from models import scraper
 
 
 def main(date=None):

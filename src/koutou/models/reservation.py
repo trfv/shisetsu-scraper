@@ -3,7 +3,6 @@ import io
 import os
 import pathlib
 
-import pandas as pd
 import psycopg2
 
 # FIXME ローカルで実行するときは、ここの第2引数を書き換える必要がある
@@ -21,7 +20,6 @@ class KoutouReservationModel:
     DAY_OF_THE_WEEK = "day_of_the_week"
     RESERVATION_DIVISION = "reservation_division"
     RESERVATION_STATUS = "reservation_status"
-    CSV_FILE = "src/koutou/reservation.csv"
 
     def __init__(self):
         self.data = []
@@ -33,8 +31,6 @@ class KoutouReservationModel:
             self.RESERVATION_DIVISION,
             self.RESERVATION_STATUS,
         ]
-        if not os.path.exists(self.CSV_FILE):
-            pathlib.Path(self.CSV_FILE).touch()
 
     def to_dict_rows(self, building, institution, rows):
         res = []
