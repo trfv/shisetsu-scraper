@@ -1,7 +1,9 @@
 import datetime
+import decimal
 import io
 import os
 import pathlib
+import time
 
 import dotenv
 import psycopg2
@@ -58,18 +60,12 @@ class KoutouReservationModel:
         return res
 
     def append(self, building, institution, rows):
-        print(f"start appending data for {building} {institution}")
+        print(f"append data for {building} {institution}")
         new_data = self.to_dict_rows(building, institution, rows)
         self.data.extend(new_data)
-        print(f"finish appending data for {building} {institution}")
 
     def copy(self):
-        print("start copying data to database")
-        conn = psycopg2.connect(DATABASE_URL, sslmode="require")
-        cur = conn.cursor()
-
         f = io.StringIO()
-        f.write(",".join(str(col) for col in self.columns) + "\n")
         f.write(
             "\n".join(
                 ",".join(str(d.get(col)) for col in self.columns) for d in self.data
@@ -77,8 +73,12 @@ class KoutouReservationModel:
         )
         f.seek(0)
 
-        cur.execute("delete from reservation;")
-        cur.copy_from(f, "reservation", sep=",", columns=self.columns)
-        cur.close()
-        conn.commit()
-        print("finish copying data to database")
+        print("copy data to database")
+        start = time.time()
+        with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
+            with conn.cursor() as cur:
+                cur.execute("delete from reservation;")
+                cur.copy_from(f, "reservation", sep=",", columns=self.columns)
+
+        end = time.time()
+        print(f"{end - start} seconds took for copying.")

@@ -62,7 +62,7 @@ class KoutouScraperModel:
 
     def exec_next_page_script(self, script):
         try:
-            WebDriverWait(self.driver, 30).until(EC.presence_of_all_elements_located,)
+            WebDriverWait(self.driver, 60).until(EC.presence_of_all_elements_located,)
             time.sleep(5)
             self.driver.execute_script(script)
         except TimeoutException as e:
@@ -166,4 +166,9 @@ class KoutouScraperModel:
             #     raise e
 
             # 次の施設へ
-            # self.exec_next_page_script(self.TO_NEXT_INSTITUTE_SCRIPT)
+            # try:
+            #     self.exec_next_page_script(self.TO_NEXT_INSTITUTE_SCRIPT)
+            # except Exception as e:
+            #     print("failed to go to next page.")
+            #     print(e)
+            #     break
