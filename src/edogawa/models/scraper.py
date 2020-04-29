@@ -146,10 +146,10 @@ class EdogawaScraperModel:
                 )
                 days = self.driver.find_element_by_xpath(self.DAYS_XPATH)
 
-                [_, temp_day_of_the_week, temp_date] = re.split("時間|\n", days.text,)
-                day_of_the_week = temp_day_of_the_week.split()
+                [_, temp_day_of_week, temp_date] = re.split("時間|\n", days.text,)
+                day_of_week = temp_day_of_week.split()
                 date = temp_date.split()
-                res = [start_date.text, date, day_of_the_week]
+                res = [start_date.text, date, day_of_week]
 
                 # テーブルデータ取得
                 table = self.driver.find_element_by_xpath(self.TABLE_XPATH)

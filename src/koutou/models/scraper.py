@@ -23,6 +23,10 @@ class KoutouScraperModel:
 
     SEARCH_VACANT_SCRIPT = "doAction(((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchVacantAction : document.formWTransInstSrchVacantAction ), gRsvWTransInstSrchVacantAction)"
     SEARCH_MULTIPLE_SCRIPT = "doAction((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchMultipleAction : document.formWTransInstSrchMultipleAction, gRsvWTransInstSrchMultipleAction)"
+    START_SETTING_CATEGORY_SCRIPT = "sendSelectWeekNum((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchMultipleAction : document.formWTransInstSrchMultipleAction, gRsvWTransInstSrchPpsdAction);"
+    CHANGE_CATEGORY_SCRIPT = "sendPpsdCd((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchMultipleAction : document.formWTransInstSrchMultipleAction, gRsvWTransInstSrchMultipleAction, '210')"
+    START_SETTING_PURPOSE_SCRIPT = "sendSelectWeekNum((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchMultipleAction : document.formWTransInstSrchMultipleAction, gRsvWTransInstSrchPpsAction);"
+    CHANGE_PURPOSE_SCRIPT = "sendPpsCd((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchMultipleAction : document.formWTransInstSrchMultipleAction, gRsvWTransInstSrchMultipleAction, '210' , '21190');"
     START_SETTING_DATE_SCRIPT = "sendSelectWeekNum((_dom == 3) ? document.layers['disp'].document.formWTransInstSrchMultipleAction : document.formWTransInstSrchMultipleAction, gRsvWTransInstSrchSetDayAction);"
     CHANGE_DATE_SCRIPT = "changeDayGif((_dom == 3) ? document.layers['disp'].document.CalendarDays{day} : document.CalendarDays{day}, {year}, {month}, {day})"
     FINISH_SETTING_DATE_SCRIPT = "sendSelectDay((_dom == 3) ? document.layers['disp'].document.formCommonSrchDayWeekAction : document.formCommonSrchDayWeekAction, gRsvWTransInstSrchMultipleAction, 1)"
@@ -118,18 +122,22 @@ class KoutouScraperModel:
         self.driver.get(self.ROOT_URL)
         self.exec_next_page_script(self.SEARCH_VACANT_SCRIPT)  # 施設の空き状況ボタン
         self.exec_next_page_script(self.SEARCH_MULTIPLE_SCRIPT)  # 複合検索ボタン
-        self.exec_next_page_script(self.START_SETTING_DATE_SCRIPT)  # 年月日ボタン
+        self.exec_next_page_script(self.START_SETTING_CATEGORY_SCRIPT)  # 利用目的分類ボタン
+        self.exec_next_page_script(self.CHANGE_CATEGORY_SCRIPT)  # 利用目的分類を「音楽講習」にする
+        self.exec_next_page_script(self.START_SETTING_PURPOSE_SCRIPT)  # 利用目的ボタン
+        self.exec_next_page_script(self.CHANGE_PURPOSE_SCRIPT)  # 利用目的を「楽団パート練習（弦楽器）」にする
+        # self.exec_next_page_script(self.START_SETTING_DATE_SCRIPT)  # 年月日ボタン
 
         # 日付設定
-        self.driver.execute_script(
-            self.CHANGE_DATE_SCRIPT.format(
-                year=self.start_date.year,
-                month=self.start_date.month,
-                day=self.start_date.day,
-            ),
-        )
+        # self.driver.execute_script(
+        #     self.CHANGE_DATE_SCRIPT.format(
+        #         year=self.start_date.year,
+        #         month=self.start_date.month,
+        #         day=self.start_date.day,
+        #     ),
+        # )
 
-        self.exec_next_page_script(self.FINISH_SETTING_DATE_SCRIPT,)  # 設定（年月日）ボタン
+        # self.exec_next_page_script(self.FINISH_SETTING_DATE_SCRIPT,)  # 設定（年月日）ボタン
         self.exec_next_page_script(self.SEARCH_START_SCRIPT)  # 複合検索ボタン
 
     def scraping(self):
@@ -142,7 +150,9 @@ class KoutouScraperModel:
                     EC.presence_of_element_located((By.ID, "disp")),
                 )
             except TimeoutException:
-                print(f"failed to load table due to timeout.")
+                print(
+                    f"failed to load table due to timeout. stop scraping and try to save current data."
+                )
                 break
 
             # 建物名・施設名取得
@@ -157,18 +167,23 @@ class KoutouScraperModel:
             self.reservation_model.append(building, institute, rows)
 
             # has_nextの更新
-            # try:
-            #     self.driver.find_element_by_xpath(self.NEXT_BUTTON_XPATH)
-            # except NoSuchElementException:  # 次施設がクリックできない時
-            has_next = False
-            # except Exception as e:  # なんらかの理由でデータが取得できなかった時
-            #     print("failed to update has_next.")
-            #     raise e
+            try:
+                self.driver.find_element_by_xpath(self.NEXT_BUTTON_XPATH)
+            except NoSuchElementException:  # 次施設がクリックできない時
+                has_next = False
+            except Exception as e:  # なんらかの理由でデータが取得できなかった時
+                print(
+                    "failed to update has_next. stop scraping and try to save current data."
+                )
+                print(e)
+                break
 
             # 次の施設へ
-            # try:
-            #     self.exec_next_page_script(self.TO_NEXT_INSTITUTE_SCRIPT)
-            # except Exception as e:
-            #     print("failed to go to next page.")
-            #     print(e)
-            #     break
+            try:
+                self.exec_next_page_script(self.TO_NEXT_INSTITUTE_SCRIPT)
+            except Exception as e:
+                print(
+                    "failed to go to next page. stop scraping and try to save current data."
+                )
+                print(e)
+                break

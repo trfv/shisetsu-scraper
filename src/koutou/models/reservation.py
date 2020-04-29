@@ -1,6 +1,7 @@
 import datetime
 import decimal
 import io
+import json
 import os
 import pathlib
 import time
@@ -20,9 +21,8 @@ class KoutouReservationModel:
     BUILDING = "building"
     INSTITUTION = "institution"
     DATE = "date"
-    DAY_OF_THE_WEEK = "day_of_the_week"
-    RESERVATION_DIVISION = "reservation_division"
-    RESERVATION_STATUS = "reservation_status"
+    DAY_OF_WEEK = "day_of_week"
+    RESERVATION = "reservation"
 
     def __init__(self):
         self.data = []
@@ -30,33 +30,32 @@ class KoutouReservationModel:
             self.BUILDING,
             self.INSTITUTION,
             self.DATE,
-            self.DAY_OF_THE_WEEK,
-            self.RESERVATION_DIVISION,
-            self.RESERVATION_STATUS,
+            self.DAY_OF_WEEK,
+            self.RESERVATION,
         ]
 
     def to_dict_rows(self, building, institution, rows):
         res = []
         header_row = rows[0]
-        now = datetime.datetime.today()
-        for i in range(1, len(rows)):
-            target_row = rows[i]
-            reservation_division = target_row[0]
-            for j in range(1, len(target_row)):
-                year = header_row[0].replace(" 年", "")
-                [date, day_of_the_week] = (
-                    header_row[j].replace("/", "-").replace(")", "").split("(")
-                )
-                res.append(
-                    {
-                        self.BUILDING: building,
-                        self.INSTITUTION: institution,
-                        self.DATE: f"{year}-{date}",
-                        self.DAY_OF_THE_WEEK: day_of_the_week,
-                        self.RESERVATION_STATUS: target_row[j],
-                        self.RESERVATION_DIVISION: reservation_division,
-                    },
-                )
+        # XXXX 年 という文字列から XXXX を取り出す
+        year = header_row[0].replace(" 年", "")
+
+        for i in range(1, len(header_row)):
+            # mm/dd(D) という文字列から、mm-dd と D を取り出す
+            [date, day_of_week] = (
+                header_row[i].replace("/", "-").replace(")", "").split("(")
+            )
+            # { 区分: 状態 } という dict を作成する
+            reservation = {row[0]: row[i] for row in rows[1:]}
+            res.append(
+                {
+                    self.BUILDING: building,
+                    self.INSTITUTION: institution,
+                    self.DATE: f"{year}-{date}",
+                    self.DAY_OF_WEEK: day_of_week,
+                    self.RESERVATION: json.dumps(reservation, ensure_ascii=False),
+                },
+            )
         return res
 
     def append(self, building, institution, rows):
@@ -68,7 +67,7 @@ class KoutouReservationModel:
         f = io.StringIO()
         f.write(
             "\n".join(
-                ",".join(str(d.get(col)) for col in self.columns) for d in self.data
+                "\t".join(str(d.get(col)) for col in self.columns) for d in self.data
             )
         )
         f.seek(0)
@@ -78,7 +77,7 @@ class KoutouReservationModel:
         with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
             with conn.cursor() as cur:
                 cur.execute("delete from reservation;")
-                cur.copy_from(f, "reservation", sep=",", columns=self.columns)
+                cur.copy_from(f, "reservation", sep="\t", columns=self.columns)
 
         end = time.time()
         print(f"{end - start} seconds took for copying.")

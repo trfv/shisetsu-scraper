@@ -20,7 +20,8 @@ class EdogawaReservationModel:
     BUILDING = "building"
     INSTITUTION = "institution"
     DATE = "date"
-    DAY_OF_THE_WEEK = "day_of_the_week"
+    DAY_OF_WEEK = "day_of_week"
+    # FIXME reservation status と reservation division をまとめたカラムに変更されました。
     RESERVATION_DIVISION = "reservation_division"
     RESERVATION_STATUS = "reservation_status"
     CSV_FILE = "src/edogawa/reservation.csv"
@@ -31,7 +32,7 @@ class EdogawaReservationModel:
             self.BUILDING,
             self.INSTITUTION,
             self.DATE,
-            self.DAY_OF_THE_WEEK,
+            self.DAY_OF_WEEK,
             self.RESERVATION_DIVISION,
             self.RESERVATION_STATUS,
         ]
@@ -52,13 +53,13 @@ class EdogawaReservationModel:
                 reservation_division = target_arr[0]
                 for k in range(1, len(target_arr)):
                     date = header_row[1][k - 1]
-                    day_of_the_week = header_row[2][k - 1]
+                    day_of_week = header_row[2][k - 1]
                     res.append(
                         {
                             self.BUILDING: building,
                             self.INSTITUTION: institution,
                             self.DATE: f"{year}-{month}-{date}",
-                            self.DAY_OF_THE_WEEK: day_of_the_week,
+                            self.DAY_OF_WEEK: day_of_week,
                             self.RESERVATION_STATUS: target_arr[k],
                             self.RESERVATION_DIVISION: reservation_division,
                         },
