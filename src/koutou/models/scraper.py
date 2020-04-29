@@ -1,6 +1,7 @@
 import os
 import time
 
+import dotenv
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
@@ -8,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# FIXME ローカル環境で実行するときは、ここの第2引数を書き換える必要がある
+dotenv.load_dotenv()
 CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "")
 GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
 

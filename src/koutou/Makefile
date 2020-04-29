@@ -1,6 +1,9 @@
 init:
 	poetry install
 
+run:
+	poetry run python main.py
+
 format:
 	poetry run black *.py
 

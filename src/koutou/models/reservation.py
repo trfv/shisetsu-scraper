@@ -3,10 +3,11 @@ import io
 import os
 import pathlib
 
+import dotenv
 import psycopg2
 
-# FIXME ローカルで実行するときは、ここの第2引数を書き換える必要がある
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
+dotenv.load_dotenv()
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 class KoutouReservationModel:
@@ -60,18 +61,24 @@ class KoutouReservationModel:
         print(f"start appending data for {building} {institution}")
         new_data = self.to_dict_rows(building, institution, rows)
         self.data.extend(new_data)
+        print(f"finish appending data for {building} {institution}")
 
     def copy(self):
+        print("start copying data to database")
         conn = psycopg2.connect(DATABASE_URL, sslmode="require")
         cur = conn.cursor()
 
         f = io.StringIO()
         f.write(",".join(str(col) for col in self.columns) + "\n")
-        f.write("\n".join(",".join(str(val) for val in d.values()) for d in self.data))
+        f.write(
+            "\n".join(
+                ",".join(str(d.get(col)) for col in self.columns) for d in self.data
+            )
+        )
         f.seek(0)
 
         cur.execute("delete from reservation;")
         cur.copy_from(f, "reservation", sep=",", columns=self.columns)
         cur.close()
         conn.commit()
-        print("copied data to database")
+        print("finish copying data to database")
