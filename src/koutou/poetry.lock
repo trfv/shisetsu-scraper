@@ -65,7 +65,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 version = "2.8.5"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Add .env support to your django/flask apps in development and deployments"
 name = "python-dotenv"
 optional = false
@@ -124,7 +124,7 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "pyOpenSSL (>=0
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
 [metadata]
-content-hash = "cefb89d69306891dca1a7ec67a9f3d0e4a8dad9508b2df4a207ab056897fcb1c"
+content-hash = "2cbcadd8dd6c544b6902e2db6cdbb2b781c9163dceae097fc88f434d0890618d"
 python-versions = "^3.7"
 
 [metadata.files]
