@@ -50,11 +50,11 @@ class KoutouReservationModel:
 
     def get_division_from_text(self, text):
         if text == "午前":
-            return ReservationDivision.MORNING.name
+            return ReservationDivision.MORNING.value
         elif text == "午後":
-            return ReservationDivision.AFTERNOON.name
+            return ReservationDivision.AFTERNOON.value
         elif text == "夜間":
-            return ReservationDivision.EVENING.name
+            return ReservationDivision.EVENING.value
         elif text == "①":
             return ReservationDivision.ONE.value
         elif text == "②":
