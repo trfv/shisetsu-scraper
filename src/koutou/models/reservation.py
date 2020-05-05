@@ -1,5 +1,6 @@
 import datetime
 import decimal
+import enum
 import io
 import json
 import os
@@ -11,6 +12,19 @@ import psycopg2
 
 dotenv.load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL")
+
+
+class ReservationDivision(enum.Enum):
+    INVALID = "RESERVATION_DIVISION_INVALID"
+    MORNING = "RESERVATION_DIVISION_MORNING"
+    AFTERNOON = "RESERVATION_DIVISION_AFTERNOON"
+    EVENING = "RESERVATION_DIVISION_EVENING"
+    ONE = "RESERVATION_DIVISION_ONE"
+    TWO = "RESERVATION_DIVISION_TWO"
+    THREE = "RESERVATION_DIVISION_THREE"
+    FOUR = "RESERVATION_DIVISION_FOUR"
+    FIVE = "RESERVATION_DIVISION_FIVE"
+    SIX = "RESERVATION_DIVISION_SIX"
 
 
 class KoutouReservationModel:
@@ -34,6 +48,28 @@ class KoutouReservationModel:
             self.RESERVATION,
         ]
 
+    def get_division_from_text(self, text):
+        if text == "午前":
+            return ReservationDivision.MORNING.name
+        elif text == "午後":
+            return ReservationDivision.AFTERNOON.name
+        elif text == "夜間":
+            return ReservationDivision.EVENING.name
+        elif text == "①":
+            return ReservationDivision.ONE.value
+        elif text == "②":
+            return ReservationDivision.TWO.value
+        elif text == "③":
+            return ReservationDivision.THREE.value
+        elif text == "④":
+            return ReservationDivision.FOUR.value
+        elif text == "⑤":
+            return ReservationDivision.FIVE.value
+        elif text == "⑥":
+            return ReservationDivision.SIX.value
+        else:
+            return ReservationDivision.INVALID.value
+
     def to_dict_rows(self, building, institution, rows):
         res = []
         header_row = rows[0]
@@ -46,7 +82,9 @@ class KoutouReservationModel:
                 header_row[i].replace("/", "-").replace(")", "").split("(")
             )
             # { 区分: 状態 } という dict を作成する
-            reservation = {row[0]: row[i] for row in rows[1:]}
+            reservation = {
+                self.get_division_from_text(row[0]): row[i] for row in rows[1:]
+            }
             res.append(
                 {
                     self.BUILDING: building,
@@ -58,8 +96,8 @@ class KoutouReservationModel:
             )
         return res
 
-    def append(self, building, institution, rows):
-        print(f"append data for {building} {institution}")
+    def append(self, building, institution, rows, week):
+        print(f"append data for {building} {institution} {week}")
         new_data = self.to_dict_rows(building, institution, rows)
         self.data.extend(new_data)
 
