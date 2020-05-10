@@ -27,6 +27,17 @@ class ReservationDivision(enum.Enum):
     SIX = "RESERVATION_DIVISION_SIX"
 
 
+class DayOfWeek(enum.Enum):
+    INVALID = "DAY_OF_WEEK_INVALID"
+    SUNDAY = "DAY_OF_WEEK_SUNDAY"
+    MONDAY = "DAY_OF_WEEK_MONDAY"
+    TUESDAY = "DAY_OF_WEEK_TUESDAY"
+    WEDNESDAY = "DAY_OF_WEEK_WEDNESDAY"
+    THUESDAY = "DAY_OF_WEEK_THUESDAY"
+    FRIDAY = "DAY_OF_WEEK_FRIDAY"
+    SATURDAY = "DAY_OF_WEEK_SATURDAY"
+
+
 class KoutouReservationModel:
     """
      reservation model for koutou-ku
@@ -50,11 +61,11 @@ class KoutouReservationModel:
 
     def get_division_from_text(self, text):
         if text == "午前":
-            return ReservationDivision.MORNING.name
+            return ReservationDivision.MORNING.value
         elif text == "午後":
-            return ReservationDivision.AFTERNOON.name
+            return ReservationDivision.AFTERNOON.value
         elif text == "夜間":
-            return ReservationDivision.EVENING.name
+            return ReservationDivision.EVENING.value
         elif text == "①":
             return ReservationDivision.ONE.value
         elif text == "②":
@@ -69,6 +80,24 @@ class KoutouReservationModel:
             return ReservationDivision.SIX.value
         else:
             return ReservationDivision.INVALID.value
+
+    def get_day_of_week_from_text(self, text):
+        if text == "日":
+            return DayOfWeek.SUNDAY.value
+        elif text == "月":
+            return DayOfWeek.MONDAY.value
+        elif text == "火":
+            return DayOfWeek.TUESDAY.value
+        elif text == "水":
+            return DayOfWeek.WEDNESDAY.value
+        elif text == "木":
+            return DayOfWeek.THUESDAY.value
+        elif text == "金":
+            return DayOfWeek.FRIDAY.value
+        elif text == "土":
+            return DayOfWeek.SATURDAY.value
+        else:
+            return DayOfWeek.INVALID.value
 
     def to_dict_rows(self, building, institution, rows):
         res = []
@@ -90,14 +119,14 @@ class KoutouReservationModel:
                     self.BUILDING: building,
                     self.INSTITUTION: institution,
                     self.DATE: f"{year}-{date}",
-                    self.DAY_OF_WEEK: day_of_week,
+                    self.DAY_OF_WEEK: self.get_day_of_week_from_text(day_of_week),
                     self.RESERVATION: json.dumps(reservation, ensure_ascii=False),
                 },
             )
         return res
 
     def append(self, building, institution, rows, week):
-        print(f"append data for {building} {institution} {week}")
+        print(f"append data for {building} {institution} (week{week})")
         new_data = self.to_dict_rows(building, institution, rows)
         self.data.extend(new_data)
 
