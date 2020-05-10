@@ -211,7 +211,7 @@ class KoutouScraperModel:
             [building, institute] = title.text.replace("<br>", "").split("\n")
 
             # その施設の空き状況を繰り返し取得する
-            for i in range(12):  # TODO それぞれの施設の予約期間に応じた回数を設定する
+            for i in range(5):  # TODO それぞれの施設の予約期間に応じた回数を設定する
                 # dispというIDのテーブルが読み込まれるまでは待機
                 try:
                     WebDriverWait(self.driver, 60).until(
