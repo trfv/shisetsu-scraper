@@ -1,12 +1,15 @@
 import datetime
+import logging
 
 from models import reservation
 from models import scraper
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s"
+)
+
 
 def main(date=None):
-    if not date:
-        date = datetime.date.today() + datetime.timedelta(days=1)
     reservation_model = reservation.KoutouReservationModel()
     scraper_model = scraper.KoutouScraperModel(date, reservation_model)
     scraper_model.prepare_for_scraping()

@@ -3,6 +3,7 @@ import decimal
 import enum
 import io
 import json
+import logging
 import os
 import pathlib
 import time
@@ -12,6 +13,8 @@ import psycopg2
 
 dotenv.load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL")
+
+logger = logging.getLogger(__name__)
 
 
 class ReservationDivision(enum.Enum):
@@ -126,7 +129,7 @@ class KoutouReservationModel:
         return res
 
     def append(self, building, institution, rows, week):
-        print(f"append data for {building} {institution} (week{week})")
+        logger.info(f"append data for {building} {institution} (week{week})")
         new_data = self.to_dict_rows(building, institution, rows)
         self.data.extend(new_data)
 
@@ -139,7 +142,7 @@ class KoutouReservationModel:
         )
         f.seek(0)
 
-        print("copy data to database")
+        logger.info("copy data to database")
         start = time.time()
         with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
             with conn.cursor() as cur:
@@ -147,4 +150,4 @@ class KoutouReservationModel:
                 cur.copy_from(f, "reservation", sep="\t", columns=self.columns)
 
         end = time.time()
-        print(f"{end - start} seconds took for copying.")
+        logger.info(f"{end - start} seconds took for copying.")

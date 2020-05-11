@@ -1,4 +1,5 @@
 import enum
+import logging
 import os
 import time
 
@@ -13,6 +14,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 dotenv.load_dotenv()
 CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH", "")
 GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
+
+logger = logging.getLogger(__name__)
 
 
 class ReservationStatus(enum.Enum):
@@ -125,10 +128,10 @@ class KoutouScraperModel:
             time.sleep(5)
             self.driver.execute_script(script)
         except TimeoutException as e:
-            print(f"failed to execute script due to timeout. script={script}")
+            logger.error(f"failed to execute script due to timeout. script={script}")
             raise e
         except Exception as e:
-            print(f"failed to execute script: {script}")
+            logger.error(f"failed to execute script: {script}")
             raise e
 
     def clear(self):
@@ -201,8 +204,8 @@ class KoutouScraperModel:
                     EC.presence_of_element_located((By.ID, "disp")),
                 )
             except TimeoutException:
-                print(
-                    f"failed to load table due to timeout. stop scraping and try to save current data."
+                logger.error(
+                    "failed to load table due to timeout. stop scraping and try to save current data."
                 )
                 break
 
@@ -211,15 +214,15 @@ class KoutouScraperModel:
             [building, institute] = title.text.replace("<br>", "").split("\n")
 
             # その施設の空き状況を繰り返し取得する
-            for i in range(5):  # TODO それぞれの施設の予約期間に応じた回数を設定する
+            for i in range(2):  # TODO それぞれの施設の予約期間に応じた回数を設定する
                 # dispというIDのテーブルが読み込まれるまでは待機
                 try:
                     WebDriverWait(self.driver, 60).until(
                         EC.presence_of_element_located((By.ID, "disp")),
                     )
                 except TimeoutException:
-                    print(
-                        f"failed to load table due to timeout. stop scraping and try to save current data."
+                    logger.error(
+                        "failed to load table due to timeout. stop scraping and try to save current data."
                     )
                     break
 
@@ -234,11 +237,10 @@ class KoutouScraperModel:
                 if i != 2:
                     try:
                         self.exec_next_page_script(self.TO_NEXT_WEEK_SCRIPT)
-                    except Exception as e:
-                        print(
+                    except Exception:
+                        logger.error(
                             "failed to go to next week. stop scraping and try to save current data."
                         )
-                        print(e)
                         break
 
             # 複合検索画面に戻る
