@@ -1,11 +1,8 @@
-import datetime
-import decimal
 import enum
 import io
 import json
 import logging
 import os
-import pathlib
 import time
 
 import dotenv
@@ -150,4 +147,4 @@ class KoutouReservationModel:
                 cur.copy_from(f, "reservation", sep="\t", columns=self.columns)
 
         end = time.time()
-        logger.info(f"{end - start} seconds took for copying.")
+        logger.info(f"{(end - start):.2f} seconds took for copying.")
