@@ -132,7 +132,7 @@ class KoutouScraperModel:
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options,
         )
-        self.driver.implicitly_wait(60)
+        self.driver.implicitly_wait(30)
 
     def clear(self):
         self.driver.quit()
@@ -177,7 +177,7 @@ class KoutouScraperModel:
         return res
 
     def get_element_by_xpath(self, xpath):
-        WebDriverWait(self.driver, 60).until(
+        WebDriverWait(self.driver, 30).until(
             EC.presence_of_element_located((By.ID, "disp"))
         )
         return self.driver.find_element_by_xpath(xpath)
@@ -186,15 +186,14 @@ class KoutouScraperModel:
         errors = []
         for _ in range(5):
             try:
-                time.sleep(1)
+                time.sleep(1)  # これがあると安定する
                 return self.get_element_by_xpath(xpath)
             except Exception as e:
-                errors.append(e)
+                logger.error(e)
             else:
                 break
         else:
             logger.error("quit scraping with failure.")
-            logger.error(errors)
             driver.quit()
 
     def prepare_for_scraping(self):
@@ -222,7 +221,7 @@ class KoutouScraperModel:
             [building, institute] = title.text.replace("<br>", "").split("\n")
 
             # その施設の空き状況を繰り返し取得する
-            for i in range(13):  # TODO それぞれの施設の予約期間に応じた回数を設定する
+            for i in range(26):  # TODO それぞれの施設の予約期間に応じた回数を設定する
                 # テーブルデータ取得
                 table = self.get_element_by_xpath(self.TABLE_XPATH)
                 rows = self.to_rows(table)
