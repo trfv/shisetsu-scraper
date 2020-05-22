@@ -230,7 +230,7 @@ class KoutouScraperModel:
                 self.reservation_model.append(building, institute, rows, i + 1)
 
                 # 翌週へ
-                if i != 5:
+                if i != 25:
                     self.get_element_by_xpath(self.NEXT_WEEK_XPATH).click()
 
             # 複合検索画面に戻る
