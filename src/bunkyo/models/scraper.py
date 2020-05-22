@@ -5,6 +5,7 @@ import time
 
 import dotenv
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -82,7 +83,7 @@ class BunkyoScraperModel:
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options,
         )
-        self.driver.implicitly_wait(30)
+        self.driver.implicitly_wait(10)
 
     def clear(self):
         self.driver.quit()
@@ -162,7 +163,7 @@ class BunkyoScraperModel:
             for j, child in enumerate(children):
                 if i > len(self.INSTITUTE_IDS_1) - 1:
                     self.get_element_by_id(self.NEXT_INSTITUTE_ID).click()
-                time.sleep(1)  # これがあると安定する
+                time.sleep(0.5)  # これがあると安定する
                 self.get_element_by_id(parent).click()
                 time.sleep(0.5)  # これがあると安定する
                 self.get_element_by_id(child).click()
@@ -172,7 +173,7 @@ class BunkyoScraperModel:
                 building, institute = title[1], title[3]
 
                 # その施設の空き状況を繰り返し取得する
-                for k in range(26):
+                for k in range(20):
                     # テーブルデータ取得
                     table = self.get_element_by_id("CONTID")
                     rows = self.to_rows(table)
@@ -180,7 +181,12 @@ class BunkyoScraperModel:
                     # データ保存
                     self.reservation_model.append(building, institute, rows, k + 1)
 
-                    if k != 25:
-                        table.find_element_by_id("NEXTWEEK").click()
+                    # 次の週へ
+                    if k != 19:
+                        try:
+                            next = table.find_element_by_id("NEXTWEEK").click()
+                        except NoSuchElementException:
+                            logger.info("no next data")
+                            break
 
                 self.get_element_by_id(self.BACK_TO_INSTITUTE_ID).click()
