@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 class ReservationStatus(enum.Enum):
     INVALID = "RESERVATION_STATUS_INVALID"
-    OK = "RESERVATION_STATUS_OK"
-    NG = "RESERVATION_STATUS_NG"
+    VACANT = "RESERVATION_STATUS_VACANT"
+    OCCUPIED = "RESERVATION_STATUS_OCCUPIED"
     KIKANGAI = "RESERVATION_STATUS_KIKANGAI"
     OPEN = "RESERVATION_STATUS_OPEN"
 
@@ -83,16 +83,16 @@ class BunkyoScraperModel:
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options,
         )
-        self.driver.implicitly_wait(10)
+        self.driver.implicitly_wait(30)
 
     def clear(self):
         self.driver.quit()
 
     def get_status_from_img_src(self, img_src):
         if self.OK_GIF in img_src:
-            return ReservationStatus.OK.value
+            return ReservationStatus.VACANT.value
         elif self.NG_GIF in img_src:
-            return ReservationStatus.NG.value
+            return ReservationStatus.OCCUPIED.value
         elif self.KIKANGAIS_GIF in img_src:
             return ReservationStatus.KIKANGAI.value
         elif self.OPEN_GIF in img_src:
@@ -162,13 +162,15 @@ class BunkyoScraperModel:
             parent, children = list(ids.keys())[0], list(ids.values())[0]
             for j, child in enumerate(children):
                 if i > len(self.INSTITUTE_IDS_1) - 1:
+                    time.sleep(1)  # これがあると安定する
                     self.get_element_by_id(self.NEXT_INSTITUTE_ID).click()
-                time.sleep(0.5)  # これがあると安定する
+                time.sleep(1)  # これがあると安定する
                 self.get_element_by_id(parent).click()
-                time.sleep(0.5)  # これがあると安定する
+                time.sleep(1)  # これがあると安定する
                 self.get_element_by_id(child).click()
 
                 # 建物名・施設名取得
+                time.sleep(1)  # これがあると安定する
                 title = self.get_element_by_class_name("HEADINFO").text.split(" ")
                 building, institute = title[1], title[3]
 
@@ -184,9 +186,13 @@ class BunkyoScraperModel:
                     # 次の週へ
                     if k != 19:
                         try:
+                            self.driver.implicitly_wait(0)
                             next = table.find_element_by_id("NEXTWEEK").click()
                         except NoSuchElementException:
                             logger.info("no next data")
+                            self.driver.implicitly_wait(30)
                             break
+                        else:
+                            self.driver.implicitly_wait(30)
 
                 self.get_element_by_id(self.BACK_TO_INSTITUTE_ID).click()
