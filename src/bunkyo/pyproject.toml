@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "koutou"
+name = "bunkyo"
 version = "0.1.0"
-description = ""
+description = "bunkyo scraper"
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]

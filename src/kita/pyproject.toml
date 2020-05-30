@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "koutou"
+name = "kita"
 version = "0.1.0"
-description = ""
+description = "kita scraper"
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
