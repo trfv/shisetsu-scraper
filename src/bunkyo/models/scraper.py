@@ -37,11 +37,16 @@ class BunkyoScraperModel:
     KIKANGAIS_GIF = "kimg_ptnw_de.gif"
     OPEN_GIF = "kimg_ptnw_open.gif"
 
+    SEARCH_VACANT_ID = "BB1"
+    SEARCH_BY_PURPOSE_ID = "BB0"
+    SET_PURPOSE_ID = "T10"
+    SET_CATEGORY_ID = "T3"
+
     INSTITUTE_IDS_1 = [
         {"T1": ["T1", "T2", "T3"]},
         {"T2": ["T1", "T2"]},
-        # {"T3": ["T1"]},
-        # {"T4": ["T1"]},
+        {"T3": ["T1"]},
+        {"T4": ["T1"]},
         {"T5": ["T1", "T2", "T3"]},
         {"T6": ["T1", "T2", "T3"]},
         {"T7": ["T1"]},
@@ -54,6 +59,10 @@ class BunkyoScraperModel:
         {"T3": ["T1"]},
     ]
 
+    TABLE_HEADER_INFO_ID = "HEADINFO"
+    TABLE_HEADER_ID = "BAR0"
+    TABLE_ID = "CONTID"
+    NEXT_WEEK_ID = "NEXTWEEK"
     NEXT_INSTITUTE_ID = "VS1"
     BACK_TO_INSTITUTE_ID = "FOOT5BTN"
 
@@ -103,7 +112,9 @@ class BunkyoScraperModel:
     def to_rows(self, table):
         res = []
         header = (
-            table.find_element_by_id("BAR0").find_elements_by_css_selector("td")[0].text
+            table.find_element_by_id(self.TABLE_HEADER_ID)
+            .find_elements_by_css_selector("td")[0]
+            .text
         )
         year = header.split("年")[0]
         for j in range(7):
@@ -150,10 +161,10 @@ class BunkyoScraperModel:
 
     def prepare_for_scraping(self):
         self.driver.get(self.ROOT_URL)
-        self.get_element_by_id("BB1").click()  # 施設の空き状況を見る
-        self.get_element_by_id("BB0").click()  # 利用目的から施設を探す
-        self.get_element_by_id("T10").click()  # 趣味文化活動
-        self.get_element_by_id("T3").click()  # ピアノ等
+        self.get_element_by_id(self.SEARCH_VACANT_ID).click()  # 施設の空き状況を見る
+        self.get_element_by_id(self.SEARCH_BY_PURPOSE_ID).click()  # 利用目的から施設を探す
+        self.get_element_by_id(self.SET_PURPOSE_ID).click()  # 趣味文化活動
+        self.get_element_by_id(self.SET_CATEGORY_ID).click()  # ピアノ等
 
     def scraping(self):
         # このメソッドを実行するときは、施設選択画面を開いている必要がある
@@ -171,13 +182,15 @@ class BunkyoScraperModel:
 
                 # 建物名・施設名取得
                 time.sleep(1)  # これがあると安定する
-                title = self.get_element_by_class_name("HEADINFO").text.split(" ")
+                title = self.get_element_by_class_name(
+                    self.TABLE_HEADER_INFO_ID
+                ).text.split(" ")
                 building, institute = title[1], title[3]
 
                 # その施設の空き状況を繰り返し取得する
                 for k in range(20):
                     # テーブルデータ取得
-                    table = self.get_element_by_id("CONTID")
+                    table = self.get_element_by_id(self.TABLE_ID)
                     rows = self.to_rows(table)
 
                     # データ保存
@@ -187,7 +200,7 @@ class BunkyoScraperModel:
                     if k != 19:
                         try:
                             self.driver.implicitly_wait(0)
-                            next = table.find_element_by_id("NEXTWEEK").click()
+                            table.find_element_by_id(self.NEXT_WEEK_ID).click()
                         except NoSuchElementException:
                             logger.info("no next data")
                             self.driver.implicitly_wait(30)
