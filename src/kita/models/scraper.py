@@ -22,7 +22,7 @@ class ReservationStatus(enum.Enum):
     VACANT = "RESERVATION_STATUS_VACANT"
     OCCUPIED = "RESERVATION_STATUS_OCCUPIED"
     KEEP = "RESERVATION_STATUS_KEEP"
-    CLOSE = "RESERVATION_STATUS_CLOSE"
+    CLOSED = "RESERVATION_STATUS_CLOSED"
     QUESTIION = "RESERVATION_STATUS_QUESTION"
 
 
@@ -123,7 +123,7 @@ class KitaScraperModel:
         elif self.MAINTE_GIF in img_src:
             return ReservationStatus.KEEP.value
         elif self.CLOSE_GIF in img_src:
-            return ReservationStatus.CLOSE.value
+            return ReservationStatus.CLOSED.value
         elif self.QUESTION_GIF in img_src:
             return ReservationStatus.QUESTIION.value
         else:
