@@ -48,6 +48,7 @@ class KitaReservationModel:
     DATE = "date"
     DAY_OF_WEEK = "day_of_week"
     RESERVATION = "reservation"
+    INSTITUTION_ID = "institution_id"
 
     def __init__(self):
         self.data = []
@@ -57,6 +58,7 @@ class KitaReservationModel:
             self.DATE,
             self.DAY_OF_WEEK,
             self.RESERVATION,
+            self.INSTITUTION_ID,
         ]
 
     def get_divisions_from_length(self, length):
@@ -95,13 +97,17 @@ class KitaReservationModel:
         else:
             return DayOfWeek.INVALID.value
 
-    def to_dict_rows(self, building, institution, rows):
+    def to_dict_rows(self, building, institution, rows, institution_id):
         # row: [date, day_of_month, [div], [ReservationStatus]]
         res = []
+        now = datetime.datetime.now()
+        year = now.year
         for row in rows:
-            year = datetime.datetime.now().year  # TODO
             # m/d という文字列を、mm-dd に変換する
             date = "-".join([s.zfill(2) for s in row[0].split("/")])
+            # 今日が1月1日ではない時に1月1日以降のデータを扱うときは、yearを加算する
+            if date == "01-01" and not (now.month == 1 and now.day == 1):
+                year = year + 1
             day_of_week = row[1]
             # { 区分: 状態 } という dict を作成する
             divs = self.get_divisions_from_length(len(row[2]))
@@ -113,13 +119,14 @@ class KitaReservationModel:
                     self.DATE: f"{year}-{date}",
                     self.DAY_OF_WEEK: self.get_day_of_week_from_text(day_of_week),
                     self.RESERVATION: json.dumps(reservation),
+                    self.INSTITUTION_ID: institution_id,
                 },
             )
         return res
 
-    def append(self, building, institution, rows, week):
+    def append(self, building, institution, rows, institution_id, week):
         logger.info(f"append data for {building} {institution} (week{week})")
-        new_data = self.to_dict_rows(building, institution, rows)
+        new_data = self.to_dict_rows(building, institution, rows, institution_id)
         self.data.extend(new_data)
 
     def copy(self):

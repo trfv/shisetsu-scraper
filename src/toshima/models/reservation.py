@@ -1,3 +1,4 @@
+import datetime
 import enum
 import io
 import json
@@ -19,11 +20,6 @@ class ReservationDivision(enum.Enum):
     MORNING = "RESERVATION_DIVISION_MORNING"
     AFTERNOON = "RESERVATION_DIVISION_AFTERNOON"
     EVENING = "RESERVATION_DIVISION_EVENING"
-    ONE = "RESERVATION_DIVISION_ONE"
-    TWO = "RESERVATION_DIVISION_TWO"
-    THREE = "RESERVATION_DIVISION_THREE"
-    FOUR = "RESERVATION_DIVISION_FOUR"
-    FIVE = "RESERVATION_DIVISION_FIVE"
 
 
 class DayOfWeek(enum.Enum):
@@ -37,9 +33,9 @@ class DayOfWeek(enum.Enum):
     SATURDAY = "DAY_OF_WEEK_SATURDAY"
 
 
-class BunkyoReservationModel:
+class ToshimaReservationModel:
     """
-    reservation model for bunkyo-ku
+    reservation model for toshima-ku
     """
 
     BUILDING = "building"
@@ -47,36 +43,24 @@ class BunkyoReservationModel:
     DATE = "date"
     DAY_OF_WEEK = "day_of_week"
     RESERVATION = "reservation"
-    INSTITUTION_ID = "institution_id"
 
     def __init__(self):
-        self.data = []
+        self.data = {}
         self.columns = [
             self.BUILDING,
             self.INSTITUTION,
             self.DATE,
             self.DAY_OF_WEEK,
             self.RESERVATION,
-            self.INSTITUTION_ID,
         ]
 
-    def get_division_from_text(self, text):
+    def get_reservation_division_from_text(self, text):
         if text == "午前":
             return ReservationDivision.MORNING.value
         elif text == "午後":
             return ReservationDivision.AFTERNOON.value
         elif text == "夜間":
             return ReservationDivision.EVENING.value
-        elif text == "１コマ":
-            return ReservationDivision.ONE.value
-        elif text == "２コマ":
-            return ReservationDivision.TWO.value
-        elif text == "３コマ":
-            return ReservationDivision.THREE.value
-        elif text == "４コマ":
-            return ReservationDivision.FOUR.value
-        elif text == "５コマ":
-            return ReservationDivision.FIVE.value
         else:
             return ReservationDivision.INVALID.value
 
@@ -98,42 +82,60 @@ class BunkyoReservationModel:
         else:
             return DayOfWeek.INVALID.value
 
-    def to_dict_rows(self, building, institution, rows, institution_id):
-        # row: [year, date, day_of_month, [div], [ReservationStatus]]
+    def to_dict_rows(self, rows):
+        # row: [buiding, institute, date, day_of_week, div, status]
         res = []
-
         for row in rows:
-            year = row[0]
-            # mm月dd日 という文字列を、mm-dd に変換する
-            date = row[1].replace("月", "-").replace("日", "")
-            # (X曜日) という文字列を X に変換する
-            day_of_week = row[2][1:2]
-            # { 区分: 状態 } という dict を作成する
-            reservation = dict(
-                zip([self.get_division_from_text(div) for div in row[3]], row[4])
-            )
+            building = row[0]
+            institution = row[1]
+            # yyyy/m/d という文字列を、yyyy, mm-dd に変換する
+            year, m, d = row[2].split("/")
+            date = f"{m.zfill(2)}-{d.zfill(2)}"
+            day_of_week = row[3]
+            # { 区分: 状態 } という dict を作成する（あとで結合する）
+            reservation = {self.get_reservation_division_from_text(row[4]): row[5]}
             res.append(
                 {
                     self.BUILDING: building,
                     self.INSTITUTION: institution,
                     self.DATE: f"{year}-{date}",
                     self.DAY_OF_WEEK: self.get_day_of_week_from_text(day_of_week),
-                    self.RESERVATION: json.dumps(reservation, ensure_ascii=False),
-                    self.INSTITUTION_ID: institution_id,
+                    self.RESERVATION: reservation,
                 },
             )
         return res
 
-    def append(self, building, institution, rows, institution_id, week):
-        logger.info(f"append data for {building} {institution} (week{week})")
-        new_data = self.to_dict_rows(building, institution, rows, institution_id)
-        self.data.extend(new_data)
+    def append(self, division, rows, month):
+        building, institution, div = rows[0][0], rows[0][1], rows[0][4]
+        logger.info(f"append data for {building} {institution} {div} (month{month})")
+        new_data = self.to_dict_rows(rows)
+        if division in self.data.keys():
+            self.data[division].extend(new_data)
+        else:
+            self.data[division] = new_data
 
     def copy(self):
+        combined = []
+        div1, div2, div3 = self.data.values()
+        for d1, d2, d3 in zip(div1, div2, div3):
+            reservation = {
+                **d1[self.RESERVATION],
+                **d2[self.RESERVATION],
+                **d3[self.RESERVATION],
+            }
+            combined.append(
+                {
+                    self.BUILDING: d1[self.BUILDING],
+                    self.INSTITUTION: d1[self.INSTITUTION],
+                    self.DATE: d1[self.DATE],
+                    self.DAY_OF_WEEK: d1[self.DAY_OF_WEEK],
+                    self.RESERVATION: json.dumps(reservation),
+                }
+            )
         f = io.StringIO()
         f.write(
             "\n".join(
-                "\t".join(str(d.get(col)) for col in self.columns) for d in self.data
+                "\t".join(str(d.get(col)) for col in self.columns) for d in combined
             )
         )
         f.seek(0)
