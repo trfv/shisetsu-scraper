@@ -48,33 +48,33 @@ class KitaScraperModel:
 
     INSTITUTE_IDS = [
         {
-            "id0": [
-                "button0",
-                "button1",
-                "button2",
-                "button3",
-                "button4",
-                "button5",
-                "button6",
-                "button7",
-                "button8",
-                "button9",
-                "button10",
+            "id0": [  # 北とぴあ
+                # "button0", # さくらホール
+                # "button1", # つつじホール
+                ("button2", "ff96c1b9-8fd5-4c54-a282-2c1a012d6232"),  # つつじリハーサル室
+                # "button3", # ペガサスホール
+                # "button4", # 飛鳥
+                ("button5", "af880795-1239-4be8-98da-466a648b8225"),  # スカイホール
+                ("button6", "7e720b3a-6574-4d83-834a-860880f959d7"),  # カナリアホール
+                ("button7", "1acc9d12-fb2c-48d5-b5f2-d74744156dc6"),  # 第1音楽スタジオ
+                ("button8", "d80cda5c-cf16-4176-a6ed-1cf836c39339"),  # 第2音楽スタジオ
+                ("button9", "57f2f1ec-0ab2-437e-baf3-fac6a7274e90"),  # 第3音楽スタジオ
+                ("button10", "a8db0273-2886-4c08-971d-9d71749098f5"),  # ドームホール
             ]
         },
         {
-            "id1": [
-                "button0",
-                "button1",
-                "button2",
-                "button3",
-                "button4",
-                "button5",
-                "button6",
-                "button7",
+            "id1": [  # 滝之川会館
+                # "button0", # 大ホール（客席）
+                # "button1", # 大ホール（平土間）
+                # "button2", # 201リハーサル室
+                # "button3", # 202リハーサル室
+                ("button4", "ad6487eb-06bd-488f-a176-d78cef8b002e"),  # 小ホール
+                # "button5", # 406和室
+                ("button6", "06dfb7ed-1261-4257-b1b1-80af1ac8eeb6"),  # B201音楽スタジオ
+                ("button7", "348939f1-6062-457e-9026-f90acc186c17"),  # B202音楽スタジオ
             ]
         },
-        {"id2": ["button0", "button1"]},
+        {"id2": [("button0", ""), ("button1", "")]},  # 赤羽会館：講堂、リハ室
     ]
 
     FACILITY_CLASS_NAME = "facilities"
@@ -189,7 +189,9 @@ class KitaScraperModel:
         # このメソッドを実行するときは、施設選択画面を開いている必要がある
         for ids in self.INSTITUTE_IDS:
             parent, children = list(ids.keys())[0], list(ids.values())[0]
-            for child in children:
+            for child_with_id in children:
+                child = child_with_id[0]
+                institution_id = child_with_id[1]
                 self.get_element_by_id(parent).click()
                 self.get_element_by_id(child).click()
                 self.get_element_by_id(self.OK_BUTTON_ID).click()
@@ -208,7 +210,9 @@ class KitaScraperModel:
                     rows = self.to_rows(table)
 
                     # データ保存
-                    self.reservation_model.append(building, institute, rows, i + 1)
+                    self.reservation_model.append(
+                        building, institute, rows, institution_id, i + 1
+                    )
 
                     # 次の週へ
                     if i != 25:

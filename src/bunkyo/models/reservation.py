@@ -47,6 +47,7 @@ class BunkyoReservationModel:
     DATE = "date"
     DAY_OF_WEEK = "day_of_week"
     RESERVATION = "reservation"
+    INSTITUTION_ID = "institution_id"
 
     def __init__(self):
         self.data = []
@@ -56,6 +57,7 @@ class BunkyoReservationModel:
             self.DATE,
             self.DAY_OF_WEEK,
             self.RESERVATION,
+            self.INSTITUTION_ID,
         ]
 
     def get_division_from_text(self, text):
@@ -96,7 +98,7 @@ class BunkyoReservationModel:
         else:
             return DayOfWeek.INVALID.value
 
-    def to_dict_rows(self, building, institution, rows):
+    def to_dict_rows(self, building, institution, rows, institution_id):
         # row: [year, date, day_of_month, [div], [ReservationStatus]]
         res = []
 
@@ -117,13 +119,14 @@ class BunkyoReservationModel:
                     self.DATE: f"{year}-{date}",
                     self.DAY_OF_WEEK: self.get_day_of_week_from_text(day_of_week),
                     self.RESERVATION: json.dumps(reservation, ensure_ascii=False),
+                    self.INSTITUTION_ID: institution_id,
                 },
             )
         return res
 
-    def append(self, building, institution, rows, week):
+    def append(self, building, institution, rows, institution_id, week):
         logger.info(f"append data for {building} {institution} (week{week})")
-        new_data = self.to_dict_rows(building, institution, rows)
+        new_data = self.to_dict_rows(building, institution, rows, institution_id)
         self.data.extend(new_data)
 
     def copy(self):

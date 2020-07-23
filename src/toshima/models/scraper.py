@@ -46,21 +46,21 @@ class ToshimaScraperModel:
     SHOW_INSTITUTE_LIST_BUTTON_ID = "btnList"
 
     INSTITUTE_IDS = [
-        "dgShisetsuList_ctl02_chkSelectLeft",
-        "dgShisetsuList_ctl03_chkSelectLeft",
-        "dgShisetsuList_ctl04_chkSelectLeft",
-        "dgShisetsuList_ctl05_chkSelectLeft",
-        "dgShisetsuList_ctl06_chkSelectLeft",
-        "dgShisetsuList_ctl07_chkSelectLeft",
-        "dgShisetsuList_ctl08_chkSelectLeft",
-        "dgShisetsuList_ctl09_chkSelectLeft",
-        "dgShisetsuList_ctl02_chkSelectRight",
-        "dgShisetsuList_ctl03_chkSelectRight",
-        "dgShisetsuList_ctl04_chkSelectRight",
-        "dgShisetsuList_ctl05_chkSelectRight",
-        "dgShisetsuList_ctl06_chkSelectRight",
+        "dgShisetsuList_ctl02_chkSelectLeft",  # 池袋本町第一区民集会室
+        "dgShisetsuList_ctl03_chkSelectLeft",  # 南長崎第一区民集会室
+        "dgShisetsuList_ctl04_chkSelectLeft",  # 区民ひろば南池袋
+        "dgShisetsuList_ctl05_chkSelectLeft",  # IKE・Biz
+        "dgShisetsuList_ctl06_chkSelectLeft",  # 駒込地域文化創造館
+        "dgShisetsuList_ctl07_chkSelectLeft",  # 南大塚地域文化創造館
+        "dgShisetsuList_ctl08_chkSelectLeft",  # 雑司が谷地域文化創造館
+        "dgShisetsuList_ctl09_chkSelectLeft",  # ふるさと千川館
+        "dgShisetsuList_ctl02_chkSelectRight",  # 高田第一区民集会室
+        "dgShisetsuList_ctl03_chkSelectRight",  # 区民ひろば西巣鴨第一
+        "dgShisetsuList_ctl04_chkSelectRight",  # 区民ひろば富士見台
+        "dgShisetsuList_ctl05_chkSelectRight",  # としま区民センター
+        "dgShisetsuList_ctl06_chkSelectRight",  # 巣鴨地域文化創造館
         # "dgShisetsuList_ctl07_chkSelectRight", 南大塚ホール
-        "dgShisetsuList_ctl08_chkSelectRight",
+        "dgShisetsuList_ctl08_chkSelectRight",  # 千早地域文化創造館
     ]
 
     SELECT_MONTH_ID = "rbtnMonth"
@@ -109,7 +109,6 @@ class ToshimaScraperModel:
         self.driver.quit()
 
     def get_status_from_text(self, text):
-
         if "○" in text:
             return ReservationStatus.VACANT.value
         elif "△" in text:
@@ -133,17 +132,27 @@ class ToshimaScraperModel:
         yearMonth, div = dateLine.find_elements_by_css_selector("td")[0].text.split(
             "\n"
         )
+        yearStr, monthStr = [s for s in yearMonth.split("年")]
+        year = int(yearStr)  # 列を右に進めるにつれて加算されうる
+        month = int(monthStr[:-1])  # 列を右に進めるにつれて加算されうる
+
         for x, y in zip(
             dateLine.find_elements_by_css_selector("td")[2:],
             statusLine.find_elements_by_css_selector("td")[2:],
         ):
             date, day_of_week = x.text.split("\n")
+            if date == "1":
+                if month == 12:
+                    year = year + 1
+                    month = 1
+                else:
+                    month = month + 1
             status = y.text
             res.append(
                 [
                     building,
                     institute,
-                    yearMonth + date,
+                    f"{year}/{month}/{date}",
                     day_of_week,
                     div,
                     self.get_status_from_text(status),
@@ -158,12 +167,14 @@ class ToshimaScraperModel:
         return self.driver.find_element_by_id(id)
 
     def wait_for_load_reservation_page(self, previous_value):
-        for _ in range(6):
+        transfered = False
+        while not transfered:
             try:
                 input = self.get_element_by_id(self.DISPLAY_START_DATE_INPUT_ID)
                 if input.get_attribute("value") == previous_value:
                     raise Exception("not transfered yet.")
                 else:
+                    transfered = True
                     break
             except Exception as e:
                 logger.info(e)

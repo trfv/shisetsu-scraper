@@ -43,20 +43,59 @@ class BunkyoScraperModel:
     SET_CATEGORY_ID = "T3"
 
     INSTITUTE_IDS_1 = [
-        {"T1": ["T1", "T2", "T3"]},
-        {"T2": ["T1", "T2"]},
-        {"T3": ["T1"]},
-        {"T4": ["T1"]},
-        {"T5": ["T1", "T2", "T3"]},
-        {"T6": ["T1", "T2", "T3"]},
-        {"T7": ["T1"]},
-        {"T8": ["T1", "T2"]},
-        {"T9": ["T1", "T2"]},
+        {
+            "T1": [  # 駒込地域活動センター
+                ("T1", "0f6eb962-3058-4151-b665-80afaf47c10f"),  # ホールA
+                ("T2", "1987bb5f-7cd4-4509-83b5-18f0dc71d832"),  # ホールB
+                ("T3", "7cd39244-2d6b-4b5c-9530-cee07bdef83e"),  # ホールA＋B
+            ]
+        },
+        {
+            "T2": [  # 不忍通りふれあい館
+                ("T1", "701cff5b-4cbc-48b6-9547-b8b2f1733d82"),  # ホール
+                ("T2", "7d0d649a-9919-46f2-a94d-f2618cf93f6b"),  # ホール＋スタジオ
+            ]
+        },
+        # {"T3": [("T1", "")]},  # シビックホール大ホール：大ホール
+        # {"T4": [("T1", "")]},  # シビックホール小ホール：小ホール
+        {
+            "T5": [  # シビックホールその他施設
+                ("T1", "e07754db-d586-4cf4-be43-2381d64988c5"),  # 多目的室
+                ("T2", "020e4cc8-8a12-496e-8963-e93369ddf18a"),  # 練習室1
+                ("T3", "f48c4b7e-afa5-4868-9e4f-c6a924b11e59"),  # 練習室2
+            ]
+        },  # シビックホールその他施設：多目的室、練習室1、練習室2
+        {
+            "T6": [  # アカデミー文京
+                ("T1", "98571d5c-1721-43d5-8f69-89ea2f1f17bc"),  # レクリエーションホール
+                ("T2", "6291a051-569d-49cc-bafc-4207a1599880"),  # 音楽室A
+                ("T3", "45ab483a-d863-48c8-b63d-1b1fa7077813"),  # 音楽室B
+            ]
+        },
+        {"T7": [("T1", "10152058-ca39-4125-b065-58b3b3a2d211")]},  # アカデミー湯島：視聴覚室
+        {
+            "T8": [  # アカデミー音羽
+                ("T1", "24b9e01e-a268-455b-8d6d-25c74d7710ff"),  # 多目的ホール
+                ("T2", "ce7ea8eb-11bf-4643-94c6-583084be3f71"),  # 多目的ホール＋洋室A
+            ]
+        },
+        {
+            "T9": [  # アカデミー茗台
+                ("T1", "7728c4f9-ab10-43a7-9954-b6c5395905de"),  # レクリエーションホールA
+                ("T2", "cbaad24e-a6ea-4063-b9cc-abd9dc38c0d9"),  # レクリエーションホールB
+            ]
+        },
     ]
     INSTITUTE_IDS_2 = [
-        {"T1": ["T1", "T2", "T3"]},
-        {"T2": ["T1"]},
-        {"T3": ["T1"]},
+        {
+            "T1": [  # アカデミー向丘
+                ("T1", "5e191f9d-c353-4708-b87a-176ef436ef2f"),  # レクリエーションホール
+                ("T2", "bc0a6231-0eae-4414-bee4-ba1c71c79a65"),  # 学習室
+                ("T3", "451d926e-aa05-4980-bb4c-d8cb7bbedab7"),  # 音楽室
+            ]
+        },
+        {"T2": [("T1", "f270e13d-be4e-430b-b6d8-451247c4dd39")]},  # 福祉センター江戸川橋：視聴覚室
+        {"T3": [("T1", "")]},  # 勤労福祉会館：第3洋室
     ]
 
     TABLE_HEADER_INFO_ID = "HEADINFO"
@@ -116,13 +155,15 @@ class BunkyoScraperModel:
             .find_elements_by_css_selector("td")[0]
             .text
         )
-        year = header.split("年")[0]
+        year = int(header.split("年")[0])  # 1月1日の行からは加算される
         for j in range(7):
             row = table.find_element_by_id(f"DAY{j + 1}")
             day = row.find_elements_by_css_selector("table")[0]
             [date, day_of_week] = day.find_element_by_class_name("DAYTX").text.split(
                 "\n"
             )
+            if date == "1月1日":
+                year = year + 1
             status = row.find_elements_by_css_selector("table")[1]
             divs = [
                 x.text
@@ -171,7 +212,9 @@ class BunkyoScraperModel:
         institute_ids = self.INSTITUTE_IDS_1 + self.INSTITUTE_IDS_2
         for i, ids in enumerate(institute_ids):
             parent, children = list(ids.keys())[0], list(ids.values())[0]
-            for j, child in enumerate(children):
+            for j, child_with_id in enumerate(children):
+                child = child_with_id[0]
+                institution_id = child_with_id[1]
                 if i > len(self.INSTITUTE_IDS_1) - 1:
                     time.sleep(1)  # これがあると安定する
                     self.get_element_by_id(self.NEXT_INSTITUTE_ID).click()
@@ -194,7 +237,9 @@ class BunkyoScraperModel:
                     rows = self.to_rows(table)
 
                     # データ保存
-                    self.reservation_model.append(building, institute, rows, k + 1)
+                    self.reservation_model.append(
+                        building, institute, rows, institution_id, k + 1
+                    )
 
                     # 次の週へ
                     if k != 19:

@@ -88,9 +88,9 @@ class ToshimaReservationModel:
         for row in rows:
             building = row[0]
             institution = row[1]
-            # yyyy年m月d という文字列を、yyyy, mm-dd に変換する
-            year, d = row[2].split("年")
-            date = "-".join([s.zfill(2) for s in d.split("月")])
+            # yyyy/m/d という文字列を、yyyy, mm-dd に変換する
+            year, m, d = row[2].split("/")
+            date = f"{m.zfill(2)}-{d.zfill(2)}"
             day_of_week = row[3]
             # { 区分: 状態 } という dict を作成する（あとで結合する）
             reservation = {self.get_reservation_division_from_text(row[4]): row[5]}
