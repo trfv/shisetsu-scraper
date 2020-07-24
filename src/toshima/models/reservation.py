@@ -14,6 +14,8 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_UUID = "00000000-0000-0000-0000-000000000000"
+
 
 class ReservationDivision(enum.Enum):
     INVALID = "RESERVATION_DIVISION_INVALID"
@@ -43,6 +45,7 @@ class ToshimaReservationModel:
     DATE = "date"
     DAY_OF_WEEK = "day_of_week"
     RESERVATION = "reservation"
+    INSTITUTION_ID = "institution_id"
 
     def __init__(self):
         self.data = {}
@@ -52,6 +55,7 @@ class ToshimaReservationModel:
             self.DATE,
             self.DAY_OF_WEEK,
             self.RESERVATION,
+            self.INSTITUTION_ID,
         ]
 
     def get_reservation_division_from_text(self, text):
@@ -101,6 +105,7 @@ class ToshimaReservationModel:
                     self.DATE: f"{year}-{date}",
                     self.DAY_OF_WEEK: self.get_day_of_week_from_text(day_of_week),
                     self.RESERVATION: reservation,
+                    self.INSTITUTION_ID: DEFAULT_UUID,
                 },
             )
         return res
@@ -130,6 +135,7 @@ class ToshimaReservationModel:
                     self.DATE: d1[self.DATE],
                     self.DAY_OF_WEEK: d1[self.DAY_OF_WEEK],
                     self.RESERVATION: json.dumps(reservation),
+                    self.INSTITUTION_ID: d1[self.INSTITUTION_ID],
                 }
             )
         f = io.StringIO()
