@@ -16,6 +16,8 @@ GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_UUID = "00000000-0000-0000-0000-000000000000"
+
 
 class ReservationStatus(enum.Enum):
     INVALID = "RESERVATION_STATUS_INVALID"
@@ -74,7 +76,7 @@ class KitaScraperModel:
                 ("button7", "348939f1-6062-457e-9026-f90acc186c17"),  # B202音楽スタジオ
             ]
         },
-        {"id2": [("button0", ""), ("button1", "")]},  # 赤羽会館：講堂、リハ室
+        {"id2": [("button0", DEFAULT_UUID), ("button1", DEFAULT_UUID)]},  # 赤羽会館：講堂、リハ室
     ]
 
     FACILITY_CLASS_NAME = "facilities"

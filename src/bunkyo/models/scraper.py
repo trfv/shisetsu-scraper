@@ -16,6 +16,8 @@ GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", "")
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_UUID = "00000000-0000-0000-0000-000000000000"
+
 
 class ReservationStatus(enum.Enum):
     INVALID = "RESERVATION_STATUS_INVALID"
@@ -95,7 +97,7 @@ class BunkyoScraperModel:
             ]
         },
         {"T2": [("T1", "f270e13d-be4e-430b-b6d8-451247c4dd39")]},  # 福祉センター江戸川橋：視聴覚室
-        {"T3": [("T1", "")]},  # 勤労福祉会館：第3洋室
+        {"T3": [("T1", DEFAULT_UUID)]},  # 勤労福祉会館：第3洋室
     ]
 
     TABLE_HEADER_INFO_ID = "HEADINFO"

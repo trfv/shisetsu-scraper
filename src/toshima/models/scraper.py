@@ -167,18 +167,19 @@ class ToshimaScraperModel:
         return self.driver.find_element_by_id(id)
 
     def wait_for_load_reservation_page(self, previous_value):
-        transfered = False
-        while not transfered:
+        for i in range(10):
             try:
                 input = self.get_element_by_id(self.DISPLAY_START_DATE_INPUT_ID)
                 if input.get_attribute("value") == previous_value:
                     raise Exception("not transfered yet.")
                 else:
-                    transfered = True
                     break
             except Exception as e:
-                logger.info(e)
-                time.sleep(10)
+                if i < 10:
+                    logger.info(e)
+                    time.sleep(30)
+                else:
+                    raise Exception("failed to scraping due to timeout.")
 
     def prepare_for_scraping(self):
         self.driver.get(self.ROOT_URL)
