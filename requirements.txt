@@ -1,4 +1,4 @@
 poetry
 black
-pre-commit-hooks
+pre-commit
 reorder_python_imports
