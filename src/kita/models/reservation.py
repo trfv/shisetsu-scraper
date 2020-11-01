@@ -142,7 +142,7 @@ class KitaReservationModel:
         start = time.time()
         with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
             with conn.cursor() as cur:
-                cur.execute("delete from reservation;")
+                cur.execute("truncate table reservation restart identity;")
                 cur.copy_from(f, "reservation", sep="\t", columns=self.columns)
 
         end = time.time()

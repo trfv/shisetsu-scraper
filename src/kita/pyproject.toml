@@ -5,10 +5,11 @@ description = "kita scraper"
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 selenium = "^3.141.0"
 psycopg2 = "^2.8.5"
 python-dotenv = "^0.13.0"
+gql = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
