@@ -8,15 +8,13 @@ import psycopg2
 import requests
 
 dotenv.load_dotenv()
-DATABASE_URL_KOUTOU = os.environ.get("DATABASE_URL_KOUTOU")
-DATABASE_URL_BUNKYO = os.environ.get("DATABASE_URL_BUNKYO")
-DATABASE_URL_KITA = os.environ.get("DATABASE_URL_KITA")
-DATABASE_URL_TOSHIMA = os.environ.get("DATABASE_URL_TOSHIMA")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 SHISETSU_APPS_SCRIPT_ENDPOINT = os.environ.get("SHISETSU_APPS_SCRIPT_ENDPOINT")
 
-
+# the same as institution.sql
 columns = [
     "id",
+    "tokyo_ward",
     "building",
     "institution",
     "capacity",
@@ -122,8 +120,9 @@ def get_equipment_division_from_text(text):
         return EquipmentDivision.INVALID
 
 
-def to_dict(row):
+def to_dict(row, tokyo_ward):
     res = {}
+    res["tokyo_ward"] = tokyo_ward
     for k, v in row.items():
         key = str(k)
         if key.startswith("reservation_division"):
@@ -153,31 +152,34 @@ def to_dict(row):
     return res
 
 
+# sheet types
 types = [
-    ("TOKYO_WARD_KOUTOU", DATABASE_URL_KOUTOU),
-    ("TOKYO_WARD_BUNKYO", DATABASE_URL_BUNKYO),
-    ("TOKYO_WARD_KITA", DATABASE_URL_KITA),
-    ("TOKYO_WARD_TOSHIMA", DATABASE_URL_TOSHIMA),
+    "TOKYO_WARD_KOUTOU",
+    "TOKYO_WARD_BUNKYO",
+    "TOKYO_WARD_KITA",
+    "TOKYO_WARD_TOSHIMA",
 ]
 
 
 def main():
-    for t in types:
-        print(f"start dbcopy for {t[0]}")
-        data = []
-        response = requests.get(f"{SHISETSU_APPS_SCRIPT_ENDPOINT}?tokyoWard={t[0]}")
+    data = []
+    for tokyo_ward in types:
+        print(f"start dbcopy for {tokyo_ward}")
+        response = requests.get(
+            f"{SHISETSU_APPS_SCRIPT_ENDPOINT}?tokyoWard={tokyo_ward}"
+        )
         for row in response.json():
-            new_data = to_dict(row)
+            new_data = to_dict(row, tokyo_ward)
             data.append(new_data)
 
-        f = io.StringIO()
-        f.write("\n".join("\t".join(str(d.get(col)) for col in columns) for d in data))
-        f.seek(0)
+    f = io.StringIO()
+    f.write("\n".join("\t".join(str(d.get(col)) for col in columns) for d in data))
+    f.seek(0)
 
-        with psycopg2.connect(t[1], sslmode="require") as conn:
-            with conn.cursor() as cur:
-                cur.execute("delete from institution;")
-                cur.copy_from(f, "institution", sep="\t", columns=columns)
+    with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
+        with conn.cursor() as cur:
+            cur.execute("truncate table institution restart identity;")
+            cur.copy_from(f, "institution", sep="\t", columns=columns)
 
 
 if __name__ == "__main__":
