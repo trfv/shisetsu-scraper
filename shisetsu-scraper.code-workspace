@@ -1,0 +1,28 @@
+{
+    "folders": [
+        {
+            "name": "koutou",
+            "path": "src/koutou"
+        },
+        {
+            "name": "bunkyo",
+            "path": "src/bunkyo"
+        },
+        {
+            "name": "kita",
+            "path": "src/kita"
+        },
+        {
+            "name": "toshima",
+            "path": "src/toshima"
+        },
+        {
+            "name": "tools",
+            "path": "src/tools"
+        },
+        {
+            "name": "shisetsu-scraper",
+            "path": "./"
+        }
+    ]
+}
