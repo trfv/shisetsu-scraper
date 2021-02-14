@@ -12,4 +12,4 @@ export:
 
 deploy:
 	export
-	git push heroku master
+	git push heroku main

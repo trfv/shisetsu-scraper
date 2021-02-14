@@ -13,6 +13,8 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 logger = logging.getLogger(__name__)
 
+tokyoWard = "TOKYO_WARD_KOUTOU"
+
 
 class ReservationDivision(enum.Enum):
     INVALID = "RESERVATION_DIVISION_INVALID"
@@ -49,16 +51,18 @@ class KoutouReservationModel:
     DAY_OF_WEEK = "day_of_week"
     RESERVATION = "reservation"
     INSTITUTION_ID = "institution_id"
+    TOKYO_WARD = "tokyo_ward"
 
     def __init__(self):
         self.data = []
         self.columns = [
+            self.INSTITUTION_ID,
+            self.TOKYO_WARD,
             self.BUILDING,
             self.INSTITUTION,
             self.DATE,
             self.DAY_OF_WEEK,
             self.RESERVATION,
-            self.INSTITUTION_ID,
         ]
 
     def get_division_from_text(self, text):
@@ -118,18 +122,19 @@ class KoutouReservationModel:
             }
             res.append(
                 {
+                    self.TOKYO_WARD: tokyoWard,
+                    self.INSTITUTION_ID: institution_id,
                     self.BUILDING: building,
                     self.INSTITUTION: institution,
                     self.DATE: f"{year}-{date}",
                     self.DAY_OF_WEEK: self.get_day_of_week_from_text(day_of_week),
                     self.RESERVATION: json.dumps(reservation, ensure_ascii=False),
-                    self.INSTITUTION_ID: institution_id,
                 },
             )
         return res
 
     def append(self, building, institution, rows, institution_id, week):
-        logger.info(f"append data for {building} {institution} (week{week})")
+        logger.debug(f"append data for {building} {institution} (week{week})")
         new_data = self.to_dict_rows(building, institution, rows, institution_id)
         self.data.extend(new_data)
 
@@ -146,7 +151,9 @@ class KoutouReservationModel:
         start = time.time()
         with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
             with conn.cursor() as cur:
-                cur.execute("truncate table reservation restart identity;")
+                cur.execute(
+                    f"delete from reservation where tokyo_ward = '{tokyoWard}';"
+                )
                 cur.copy_from(f, "reservation", sep="\t", columns=self.columns)
 
         end = time.time()

@@ -125,7 +125,12 @@ def to_dict(row, tokyo_ward):
     res["tokyo_ward"] = tokyo_ward
     for k, v in row.items():
         key = str(k)
-        if key.startswith("reservation_division"):
+        if key == "capacity" or key == "area":
+            if v != "":
+                res[key] = v
+            else:
+                res[key] = None
+        elif key == "reservation_division":
             if v:
                 res[key] = (
                     "{"
@@ -136,7 +141,7 @@ def to_dict(row, tokyo_ward):
                 )
             else:
                 res[key] = "{}"
-        elif key.endswith("_fee"):
+        elif key.endswith("usage_fee"):
             tmp = {}
             if v:
                 for i in v.split(","):
@@ -164,7 +169,6 @@ types = [
 def main():
     data = []
     for tokyo_ward in types:
-        print(f"start dbcopy for {tokyo_ward}")
         response = requests.get(
             f"{SHISETSU_APPS_SCRIPT_ENDPOINT}?tokyoWard={tokyo_ward}"
         )
@@ -179,7 +183,7 @@ def main():
     with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
         with conn.cursor() as cur:
             cur.execute("truncate table institution restart identity;")
-            cur.copy_from(f, "institution", sep="\t", columns=columns)
+            cur.copy_from(f, "institution", sep="\t", columns=columns, null="None")
 
 
 if __name__ == "__main__":
