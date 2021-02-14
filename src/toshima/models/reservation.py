@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_UUID = "00000000-0000-0000-0000-000000000000"
 
+tokyoWard = "TOKYO_WARD_TOSHIMA"
+
 
 class ReservationDivision(enum.Enum):
     INVALID = "RESERVATION_DIVISION_INVALID"
@@ -46,16 +48,18 @@ class ToshimaReservationModel:
     DAY_OF_WEEK = "day_of_week"
     RESERVATION = "reservation"
     INSTITUTION_ID = "institution_id"
+    TOKYO_WARD = "tokyo_ward"
 
     def __init__(self):
         self.data = {}
         self.columns = [
+            self.INSTITUTION_ID,
+            self.TOKYO_WARD,
             self.BUILDING,
             self.INSTITUTION,
             self.DATE,
             self.DAY_OF_WEEK,
             self.RESERVATION,
-            self.INSTITUTION_ID,
         ]
 
     def get_reservation_division_from_text(self, text):
@@ -112,7 +116,7 @@ class ToshimaReservationModel:
 
     def append(self, division, rows, month):
         building, institution, div = rows[0][0], rows[0][1], rows[0][4]
-        logger.info(f"append data for {building} {institution} {div} (month{month})")
+        logger.debug(f"append data for {building} {institution} {div} (month{month})")
         new_data = self.to_dict_rows(rows)
         if division in self.data.keys():
             self.data[division].extend(new_data)
@@ -130,12 +134,13 @@ class ToshimaReservationModel:
             }
             combined.append(
                 {
+                    self.TOKYO_WARD: tokyoWard,
+                    self.INSTITUTION_ID: d1[self.INSTITUTION_ID],
                     self.BUILDING: d1[self.BUILDING],
                     self.INSTITUTION: d1[self.INSTITUTION],
                     self.DATE: d1[self.DATE],
                     self.DAY_OF_WEEK: d1[self.DAY_OF_WEEK],
                     self.RESERVATION: json.dumps(reservation),
-                    self.INSTITUTION_ID: d1[self.INSTITUTION_ID],
                 }
             )
         f = io.StringIO()
@@ -150,7 +155,9 @@ class ToshimaReservationModel:
         start = time.time()
         with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
             with conn.cursor() as cur:
-                cur.execute("truncate table reservation restart identity;")
+                cur.execute(
+                    f"delete from reservation where tokyo_ward = '{tokyoWard}';"
+                )
                 cur.copy_from(f, "reservation", sep="\t", columns=self.columns)
 
         end = time.time()
