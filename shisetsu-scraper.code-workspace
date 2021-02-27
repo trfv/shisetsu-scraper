@@ -2,23 +2,23 @@
     "folders": [
         {
             "name": "koutou",
-            "path": "src/koutou"
+            "path": "project/koutou"
         },
         {
             "name": "bunkyo",
-            "path": "src/bunkyo"
+            "path": "project/bunkyo"
         },
         {
             "name": "kita",
-            "path": "src/kita"
+            "path": "project/kita"
         },
         {
             "name": "toshima",
-            "path": "src/toshima"
+            "path": "project/toshima"
         },
         {
             "name": "tools",
-            "path": "src/tools"
+            "path": "tools"
         },
         {
             "name": "shisetsu-scraper",
