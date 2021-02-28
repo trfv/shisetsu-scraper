@@ -1,0 +1,15 @@
+[submodule "project/koutou"]
+    path = project/koutou
+    url = https://git.heroku.com/koutou-scraper.git
+
+[submodule "project/bunkyo"]
+    path = project/bunkyo
+    url = https://git.heroku.com/bunkyo-scraper.git
+
+[submodule "project/kita"]
+    path = project/kita
+    url = https://git.heroku.com/kita-scraper.git
+
+[submodule "project/toshima"]
+    path = project/toshima
+    url = https://git.heroku.com/toshima-scraper.git
