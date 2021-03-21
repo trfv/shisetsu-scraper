@@ -17,6 +17,10 @@
             "path": "project/toshima"
         },
         {
+            "name": "edogawa",
+            "path": "project/edogawa"
+        },
+        {
             "name": "tools",
             "path": "tools"
         },
