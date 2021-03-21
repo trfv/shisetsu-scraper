@@ -13,3 +13,7 @@
 [submodule "project/toshima"]
     path = project/toshima
     url = https://git.heroku.com/toshima-scraper.git
+
+[submodule "project/edogawa"]
+    path = project/edogawa
+    url = https://git.heroku.com/edogawa-scraper.git

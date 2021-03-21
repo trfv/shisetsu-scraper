@@ -43,6 +43,8 @@ class ReservationDivision(enum.Enum):
     AFTERNOON_ONE = "RESERVATION_DIVISION_AFTERNOON_ONE"
     AFTERNOON_TWO = "RESERVATION_DIVISION_AFTERNOON_TWO"
     EVENING = "RESERVATION_DIVISION_EVENING"
+    EVENING_ONE = "RESERVATION_DIVISION_EVENING_ONE"
+    EVENING_TWO = "RESERVATION_DIVISION_EVENING_TWO"
     ONE = "RESERVATION_DIVISION_ONE"
     TWO = "RESERVATION_DIVISION_TWO"
     THREE = "RESERVATION_DIVISION_THREE"
@@ -64,6 +66,10 @@ def get_reservation_division_from_text(text):
         return ReservationDivision.AFTERNOON_TWO.value
     elif text == "夜間":
         return ReservationDivision.EVENING.value
+    elif text == "夜間1":
+        return ReservationDivision.EVENING_ONE.value
+    elif text == "夜間2":
+        return ReservationDivision.EVENING_TWO.value
     elif text == "①":
         return ReservationDivision.ONE.value
     elif text == "②":
@@ -163,6 +169,7 @@ types = [
     "TOKYO_WARD_BUNKYO",
     "TOKYO_WARD_KITA",
     "TOKYO_WARD_TOSHIMA",
+    "TOKYO_WARD_EDOGAWA",
 ]
 
 
