@@ -21,6 +21,10 @@
             "path": "project/edogawa"
         },
         {
+            "name": "arakawa",
+            "path": "project/arakawa"
+        },
+        {
             "name": "tools",
             "path": "tools"
         },
