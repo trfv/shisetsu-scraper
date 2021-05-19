@@ -12,23 +12,22 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 SHISETSU_APPS_SCRIPT_ENDPOINT = os.environ.get("SHISETSU_APPS_SCRIPT_ENDPOINT")
 
 
-class ReservationDivision(enum.Enum):
-    INVALID = ("RESERVATION_DIVISION_INVALID", None)
-    MORNING = ("RESERVATION_DIVISION_MORNING", "午前")
-    AFTERNOON = ("RESERVATION_DIVISION_AFTERNOON", "午後")
-    AFTERNOON_ONE = ("RESERVATION_DIVISION_AFTERNOON_ONE", "午後1")
-    AFTERNOON_TWO = ("RESERVATION_DIVISION_AFTERNOON_TWO", "午後2")
-    EVENING = ("RESERVATION_DIVISION_EVENING", "夜間")
-    EVENING_ONE = ("RESERVATION_DIVISION_EVENING_ONE", "夜間1")
-    EVENING_TWO = ("RESERVATION_DIVISION_EVENING_TWO", "夜間2")
-    ONE = ("RESERVATION_DIVISION_ONE", "①")
-    TWO = ("RESERVATION_DIVISION_TWO", "②")
-    THREE = ("RESERVATION_DIVISION_THREE", "③")
-    FOUR = ("RESERVATION_DIVISION_FOUR", "④")
-    FIVE = ("RESERVATION_DIVISION_FIVE", "⑤")
-    SIX = ("RESERVATION_DIVISION_SIX", "⑥")
-    ONE_HOUR = ("RESERVATION_DIVISION_ONE_HOUR", "1時間")
-    TWO_HOUR = ("RESERVATION_DIVISION_TWO_HOUR", "2時間")
+class FeeDivision(enum.Enum):
+    INVALID = ("FEE_DIVISION_INVALID", None)
+    MORNING = ("FEE_DIVISION_MORNING", "午前")
+    AFTERNOON = ("FEE_DIVISION_AFTERNOON", "午後")
+    AFTERNOON_ONE = ("FEE_DIVISION_AFTERNOON_ONE", "午後1")
+    AFTERNOON_TWO = ("FEE_DIVISION_AFTERNOON_TWO", "午後2")
+    EVENING = ("FEE_DIVISION_EVENING", "夜間")
+    EVENING_ONE = ("FEE_DIVISION_EVENING_ONE", "夜間1")
+    EVENING_TWO = ("FEE_DIVISION_EVENING_TWO", "夜間2")
+    ONE_HOUR = ("FEE_DIVISION_ONE_HOUR", "1時間")
+    DIVISION_1 = ("FEE_DIVISION_DIVISION_1", "①")
+    DIVISION_2 = ("FEE_DIVISION_DIVISION_2", "②")
+    DIVISION_3 = ("FEE_DIVISION_DIVISION_3", "③")
+    DIVISION_4 = ("FEE_DIVISION_DIVISION_4", "④")
+    DIVISION_5 = ("FEE_DIVISION_DIVISION_5", "⑤")
+    DIVISION_6 = ("FEE_DIVISION_DIVISION_6", "⑥")
 
     def __init__(self, k, v):
         self.k = k
@@ -88,13 +87,11 @@ def to_dict(row, tokyo_ward):
                 res[key] = v
             else:
                 res[key] = None
-        elif key == "reservation_division":
+        elif key == "fee_division":
             if v:
                 res[key] = (
                     "{"
-                    + ",".join(
-                        [ReservationDivision.to_enum_value(t) for t in v.split(",")]
-                    )
+                    + ",".join([FeeDivision.to_enum_value(t) for t in v.split(",")])
                     + "}"
                 )
             else:
@@ -104,7 +101,7 @@ def to_dict(row, tokyo_ward):
             if v:
                 for i in v.split(","):
                     x, y = i.split("=")
-                    tmp[ReservationDivision.to_enum_value(x)] = y
+                    tmp[FeeDivision.to_enum_value(x)] = y
             res[key] = json.dumps(tmp, ensure_ascii=False)
         elif key.startswith("is_available"):
             res[key] = AvailabilityDivision.to_enum_value(v) if v else ""
@@ -124,7 +121,7 @@ COLUMNS = [
     "institution_system_name",
     "capacity",
     "area",
-    "reservation_division",
+    "fee_division",
     "weekday_usage_fee",
     "holiday_usage_fee",
     "address",
@@ -146,6 +143,7 @@ AVAILABLE_TOKYO_WARDS = [
     "TOKYO_WARD_KITA",
     "TOKYO_WARD_TOSHIMA",
     "TOKYO_WARD_EDOGAWA",
+    "TOKYO_WARD_ARAKAWA",
 ]
 
 

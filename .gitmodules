@@ -17,3 +17,7 @@
 [submodule "project/edogawa"]
     path = project/edogawa
     url = https://git.heroku.com/edogawa-scraper.git
+
+[submodule "project/arakawa"]
+    path = project/arakawa
+    url = https://git.heroku.com/arakawa-scraper.git
