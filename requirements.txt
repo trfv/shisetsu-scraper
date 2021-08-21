@@ -1,4 +1,1 @@
 poetry
-black
-pre-commit
-reorder_python_imports

@@ -79,7 +79,8 @@ class EquipmentDivision(enum.Enum):
 
 def to_dict(row, tokyo_ward):
     res = {}
-    res["tokyo_ward"] = tokyo_ward
+    res["prefecture"] = "PREFECTURE_TOKYO"
+    res["municipality"] = tokyo_ward.replace("TOKYO_WARD", "MUNICIPALITY") # TODO fix gas
     for k, v in row.items():
         key = str(k)
         if key == "capacity" or key == "area":
@@ -87,21 +88,24 @@ def to_dict(row, tokyo_ward):
                 res[key] = v
             else:
                 res[key] = None
-        elif key == "fee_division":
+        elif key == "fee_division" or key == "fee_divisions": # TODO fix gas
             if v:
-                res[key] = (
+                res["fee_divisions"] = (
                     "{"
                     + ",".join([FeeDivision.to_enum_value(t) for t in v.split(",")])
                     + "}"
                 )
             else:
-                res[key] = "{}"
+                res["fee_divisions"] = "{}"
         elif key.endswith("usage_fee"):
-            tmp = {}
+            tmp = []
             if v:
                 for i in v.split(","):
                     x, y = i.split("=")
-                    tmp[FeeDivision.to_enum_value(x)] = y
+                    tmp.append({
+                        "division": FeeDivision.to_enum_value(x),
+                        "fee": int(y)
+                    })
             res[key] = json.dumps(tmp, ensure_ascii=False)
         elif key.startswith("is_available"):
             res[key] = AvailabilityDivision.to_enum_value(v) if v else ""
@@ -114,14 +118,15 @@ def to_dict(row, tokyo_ward):
 
 COLUMNS = [
     "id",
-    "tokyo_ward",
+    "prefecture",
+    "municipality",
     "building",
     "institution",
     "building_system_name",
     "institution_system_name",
     "capacity",
     "area",
-    "fee_division",
+    "fee_divisions",
     "weekday_usage_fee",
     "holiday_usage_fee",
     "address",
@@ -163,8 +168,8 @@ def main():
 
     with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
         with conn.cursor() as cur:
-            cur.execute("truncate table institution restart identity;")
-            cur.copy_from(f, "institution", sep="\t", columns=COLUMNS, null="None")
+            cur.execute("truncate table institutions restart identity;")
+            cur.copy_from(f, "institutions", sep="\t", columns=COLUMNS, null="None")
 
 
 if __name__ == "__main__":
