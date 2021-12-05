@@ -4,11 +4,13 @@ import json
 import os
 
 import dotenv
-import psycopg2
 import requests
+from gql import gql, Client
+from gql.transport.requests import RequestsHTTPTransport
 
 dotenv.load_dotenv()
-DATABASE_URL = os.environ.get("DATABASE_URL")
+GRAPHQL_URL = os.environ.get("GRAPHQL_URL", "")
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")
 SHISETSU_APPS_SCRIPT_ENDPOINT = os.environ.get("SHISETSU_APPS_SCRIPT_ENDPOINT")
 
 
@@ -80,7 +82,7 @@ class EquipmentDivision(enum.Enum):
 def to_dict(row, tokyo_ward):
     res = {}
     res["prefecture"] = "PREFECTURE_TOKYO"
-    res["municipality"] = tokyo_ward.replace("TOKYO_WARD", "MUNICIPALITY") # TODO fix gas
+    res["municipality"] = tokyo_ward.replace("TOKYO_WARD", "MUNICIPALITY")
     for k, v in row.items():
         key = str(k)
         if key == "capacity" or key == "area":
@@ -88,7 +90,7 @@ def to_dict(row, tokyo_ward):
                 res[key] = v
             else:
                 res[key] = None
-        elif key == "fee_division" or key == "fee_divisions": # TODO fix gas
+        elif key == "fee_divisions":
             if v:
                 res["fee_divisions"] = (
                     "{"
@@ -106,7 +108,7 @@ def to_dict(row, tokyo_ward):
                         "division": FeeDivision.to_enum_value(x),
                         "fee": int(y)
                     })
-            res[key] = json.dumps(tmp, ensure_ascii=False)
+            res[key] = tmp
         elif key.startswith("is_available"):
             res[key] = AvailabilityDivision.to_enum_value(v) if v else ""
         elif key.startswith("is_equipped"):
@@ -122,6 +124,8 @@ COLUMNS = [
     "municipality",
     "building",
     "institution",
+    "building_kana",
+    "institution_kana",
     "building_system_name",
     "institution_system_name",
     "capacity",
@@ -142,34 +146,60 @@ COLUMNS = [
     "note",
 ]
 
-AVAILABLE_TOKYO_WARDS = [
-    "TOKYO_WARD_KOUTOU",
-    "TOKYO_WARD_BUNKYO",
-    "TOKYO_WARD_KITA",
-    "TOKYO_WARD_TOSHIMA",
-    "TOKYO_WARD_EDOGAWA",
-    "TOKYO_WARD_ARAKAWA",
+AVAILABLE_MUNICIPALITIES = [
+    "MUNICIPALITY_KOUTOU",
+    "MUNICIPALITY_BUNKYO",
+    "MUNICIPALITY_KITA",
+    "MUNICIPALITY_TOSHIMA",
+    "MUNICIPALITY_EDOGAWA",
+    "MUNICIPALITY_ARAKAWA",
 ]
 
 
 def main():
     data = []
-    for tokyo_ward in AVAILABLE_TOKYO_WARDS:
+    for municipality in AVAILABLE_MUNICIPALITIES:
         response = requests.get(
-            f"{SHISETSU_APPS_SCRIPT_ENDPOINT}?tokyoWard={tokyo_ward}"
+            f"{SHISETSU_APPS_SCRIPT_ENDPOINT}?tokyoWard={municipality}"
         )
         for row in response.json():
-            new_data = to_dict(row, tokyo_ward)
+            new_data = to_dict(row, municipality)
             data.append(new_data)
 
-    f = io.StringIO()
-    f.write("\n".join("\t".join(str(d.get(col)) for col in COLUMNS) for d in data))
-    f.seek(0)
-
-    with psycopg2.connect(DATABASE_URL, sslmode="require") as conn:
-        with conn.cursor() as cur:
-            cur.execute("truncate table institutions restart identity;")
-            cur.copy_from(f, "institutions", sep="\t", columns=COLUMNS, null="None")
+    client = Client(
+        transport=RequestsHTTPTransport(
+            url = GRAPHQL_URL,
+            use_json = True,
+            headers = {
+                "Content-type": "application/json",
+                "X-Hasura-Admin-Secret": ADMIN_SECRET,
+            },
+            retries = 3,
+        ),
+        fetch_schema_from_transport=True,
+    )
+    client.execute(
+        gql("""
+            mutation update_institutions(
+                $data: [institutions_new_insert_input!]!
+                $columns: [institutions_new_update_column!]!
+            ) {
+                insert_institutions_new(
+                    objects: $data,
+                    on_conflict: {
+                        constraint: institutions_new_id_key,
+                        update_columns: $columns
+                    }
+                ) {
+                    affected_rows
+                }
+            }"""
+        ),
+        variable_values={
+            "data": data,
+            "columns": COLUMNS
+        }
+    )
 
 
 if __name__ == "__main__":
