@@ -25,6 +25,10 @@
             "path": "project/arakawa"
         },
         {
+            "name": "sumida",
+            "path": "project/sumida"
+        },
+        {
             "name": "tools",
             "path": "tools"
         },

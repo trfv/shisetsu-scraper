@@ -21,3 +21,7 @@
 [submodule "project/arakawa"]
     path = project/arakawa
     url = https://git.heroku.com/arakawa-scraper.git
+
+[submodule "project/sumida"]
+    path = project/sumida
+    url = https://git.heroku.com/sumida-scraper.git
