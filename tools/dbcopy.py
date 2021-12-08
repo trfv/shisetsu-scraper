@@ -181,13 +181,13 @@ def main():
     client.execute(
         gql("""
             mutation update_institutions(
-                $data: [institutions_new_insert_input!]!
-                $columns: [institutions_new_update_column!]!
+                $data: [institutions_insert_input!]!
+                $columns: [institutions_update_column!]!
             ) {
-                insert_institutions_new(
+                insert_institutions(
                     objects: $data,
                     on_conflict: {
-                        constraint: institutions_new_id_key,
+                        constraint: institutions_id_key,
                         update_columns: $columns
                     }
                 ) {
