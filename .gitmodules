@@ -25,3 +25,7 @@
 [submodule "project/sumida"]
     path = project/sumida
     url = https://git.heroku.com/sumida-scraper.git
+
+[submodule "project/ota"]
+    path = project/ota
+    url = https://git.heroku.com/ota-scraper.git

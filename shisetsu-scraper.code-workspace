@@ -29,6 +29,10 @@
             "path": "project/sumida"
         },
         {
+            "name": "ota",
+            "path": "project/ota"
+        },
+        {
             "name": "tools",
             "path": "tools"
         },
