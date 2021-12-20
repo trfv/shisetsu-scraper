@@ -29,3 +29,7 @@
 [submodule "project/ota"]
     path = project/ota
     url = https://git.heroku.com/ota-scraper.git
+
+[submodule "project/suginami"]
+    path = project/suginami
+    url = https://git.heroku.com/suginami-scraper.git
