@@ -24,6 +24,7 @@ class FeeDivision(enum.Enum):
     EVENING_ONE = ("FEE_DIVISION_EVENING_ONE", "夜間1")
     EVENING_TWO = ("FEE_DIVISION_EVENING_TWO", "夜間2")
     ONE_HOUR = ("FEE_DIVISION_ONE_HOUR", "1時間")
+    TWO_HOUR = ("FEE_DIVISION_TWO_HOUR", "2時間")
     DIVISION_1 = ("FEE_DIVISION_DIVISION_1", "①")
     DIVISION_2 = ("FEE_DIVISION_DIVISION_2", "②")
     DIVISION_3 = ("FEE_DIVISION_DIVISION_3", "③")
@@ -78,6 +79,24 @@ class EquipmentDivision(enum.Enum):
                 return c.k
         return cls.INVALID.k
 
+class InstitutionSize(enum.Enum):
+    INVALID = ("INSTITUTION_SIZE_INVALID", None)
+    LARGE = ("INSTITUTION_SIZE_LARGE", "大")
+    MEDIUM = ("INSTITUTION_SIZE_MEDIUM", "中")
+    SMALL = ("INSTITUTION_SIZE_SMALL", "小")
+    UNKNOWN = ("INSTITUTION_SIZE_UNKNOWN", "不明")
+
+    def __init__(self, k, v):
+        self.k = k
+        self.v = v
+
+    @classmethod
+    def to_enum_value(cls, v):
+        for c in [*cls.__members__.values()]:
+            if v == c.v:
+                return c.k
+        return cls.INVALID.k
+
 
 def to_dict(row, tokyo_ward):
     res = {}
@@ -113,6 +132,8 @@ def to_dict(row, tokyo_ward):
             res[key] = AvailabilityDivision.to_enum_value(v) if v else ""
         elif key.startswith("is_equipped"):
             res[key] = EquipmentDivision.to_enum_value(v) if v else ""
+        elif key == "institution_size":
+            res[key] = InstitutionSize.to_enum_value(v) if v else ""
         else:
             res[key] = v
     return res
@@ -130,6 +151,7 @@ COLUMNS = [
     "institution_system_name",
     "capacity",
     "area",
+    "institution_size",
     "fee_divisions",
     "weekday_usage_fee",
     "holiday_usage_fee",
@@ -156,6 +178,7 @@ AVAILABLE_MUNICIPALITIES = [
     "MUNICIPALITY_SUMIDA",
     "MUNICIPALITY_OTA",
     "MUNICIPALITY_SUGINAMI",
+    "MUNICIPALITY_CHUO",
 ]
 
 
@@ -181,7 +204,7 @@ def main():
         ),
         fetch_schema_from_transport=True,
     )
-    client.execute(
+    affected_rows = client.execute(
         gql("""
             mutation update_institutions(
                 $data: [institutions_insert_input!]!
@@ -203,6 +226,7 @@ def main():
             "columns": COLUMNS
         }
     )
+    print(f"affected_rows: {len(affected_rows)}")
 
 
 if __name__ == "__main__":
