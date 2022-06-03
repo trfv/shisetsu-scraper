@@ -33,3 +33,7 @@
 [submodule "project/suginami"]
     path = project/suginami
     url = https://git.heroku.com/suginami-scraper.git
+
+[submodule "project/chuo"]
+    path = project/chuo
+    url = https://git.heroku.com/chuo-scraper.git

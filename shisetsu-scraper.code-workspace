@@ -37,6 +37,10 @@
             "path": "project/suginami"
         },
         {
+            "name": "chuo",
+            "path": "project/chuo"
+        },
+        {
             "name": "tools",
             "path": "tools"
         },
