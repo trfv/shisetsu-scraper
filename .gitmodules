@@ -37,3 +37,7 @@
 [submodule "project/chuo"]
     path = project/chuo
     url = https://git.heroku.com/chuo-scraper.git
+
+[submodule "project/kawasaki"]
+    path = project/kawasaki
+    url = https://git.heroku.com/kawasaki-scraper.git

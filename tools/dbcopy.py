@@ -98,10 +98,10 @@ class InstitutionSize(enum.Enum):
         return cls.INVALID.k
 
 
-def to_dict(row, tokyo_ward):
+def to_dict(row, prefecture, municipality):
     res = {}
-    res["prefecture"] = "PREFECTURE_TOKYO"
-    res["municipality"] = tokyo_ward.replace("TOKYO_WARD", "MUNICIPALITY")
+    res["prefecture"] = prefecture
+    res["municipality"] = municipality.replace("TOKYO_WARD", "MUNICIPALITY")
     for k, v in row.items():
         key = str(k)
         if key == "capacity" or key == "area":
@@ -169,27 +169,28 @@ COLUMNS = [
 ]
 
 AVAILABLE_MUNICIPALITIES = [
-    "MUNICIPALITY_KOUTOU",
-    "MUNICIPALITY_BUNKYO",
-    "MUNICIPALITY_KITA",
-    "MUNICIPALITY_TOSHIMA",
-    "MUNICIPALITY_EDOGAWA",
-    "MUNICIPALITY_ARAKAWA",
-    "MUNICIPALITY_SUMIDA",
-    "MUNICIPALITY_OTA",
-    "MUNICIPALITY_SUGINAMI",
-    "MUNICIPALITY_CHUO",
+    # ("MUNICIPALITY_KOUTOU", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_BUNKYO", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_KITA", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_TOSHIMA", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_EDOGAWA", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_ARAKAWA", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_SUMIDA", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_OTA", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_SUGINAMI", "PREFECTURE_TOKYO"),
+    # ("MUNICIPALITY_CHUO", "PREFECTURE_TOKYO"),
+    ("MUNICIPALITY_KAWASAKI", "PREFECTURE_KANAGAWA")
 ]
 
 
 def main():
     data = []
-    for municipality in AVAILABLE_MUNICIPALITIES:
+    for municipality, prefecture in AVAILABLE_MUNICIPALITIES:
         response = requests.get(
             f"{SHISETSU_APPS_SCRIPT_ENDPOINT}?tokyoWard={municipality}"
         )
         for row in response.json():
-            new_data = to_dict(row, municipality)
+            new_data = to_dict(row, prefecture, municipality)
             data.append(new_data)
 
     client = Client(
@@ -226,7 +227,7 @@ def main():
             "columns": COLUMNS
         }
     )
-    print(f"affected_rows: {len(affected_rows)}")
+    print(affected_rows)
 
 
 if __name__ == "__main__":
