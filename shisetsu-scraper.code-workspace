@@ -41,6 +41,10 @@
             "path": "project/chuo"
         },
         {
+            "name": "kawasaki",
+            "path": "project/kawasaki"
+        },
+        {
             "name": "tools",
             "path": "tools"
         },
