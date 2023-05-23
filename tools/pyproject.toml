@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.8"
 python-dotenv = "^0.17.0"
 gql = "^2.0.0"
-requests = "^2.26.0"
+requests = "^2.31.0"
 
 [tool.poetry.dev-dependencies]
 
